@@ -1,10 +1,27 @@
 {
-  "name": "xzvbxcvbxcvbcxvb",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/vm-encoder.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+  "name": "vm-escape",
+  "version": "0.1.0",
+  "description": "Extract data from isolated VMs through side channels (screen, audio). Encoder renders data as colored pixel grids on canvas, decoder captures the screen and reconstructs the original file.",
+  "license": "MIT",
+  "private": true,
+  "bin": {
+    "vm-encode": "src/vm-encoder.js",
+    "generate-dummies": "scripts/generate-dummies.js"
   },
-  "private": true
+  "scripts": {
+    "encode": "node src/vm-encoder.js",
+    "dummies": "node scripts/generate-dummies.js",
+    "dummies:tiny": "node scripts/generate-dummies.js --preset tiny",
+    "dummies:small": "node scripts/generate-dummies.js --preset small",
+    "dummies:medium": "node scripts/generate-dummies.js --preset medium",
+    "dummies:all": "node scripts/generate-dummies.js"
+  },
+  "keywords": [
+    "vm",
+    "data-exfiltration",
+    "screen-encoding",
+    "visual-data-transfer",
+    "side-channel",
+    "airgap"
+  ]
 }

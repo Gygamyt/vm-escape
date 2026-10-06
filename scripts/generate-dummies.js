@@ -3,27 +3,26 @@
 
 /**
  * ===== DUMMY DATA GENERATOR =====
- * Генерирует тестовые файлы разных размеров для демонстрации PoC
- * визуального пайплайна передачи данных через экран.
+ * Generates test files of various sizes for visual data pipeline PoC demos.
  *
- * Режимы:
- *   allure  — имитация allure-results (структура папок, JSON, attachments)
- *   random  — случайные бинарные файлы
- *   text    — текстовые файлы (логи, CSV)
+ * Modes:
+ *   allure  — simulated allure-results (folder structure, JSON, attachments)
+ *   random  — random binary files
+ *   text    — text files (logs, CSV)
  *
- * Использование:
- *   node generate-dummies.js                          # все пресеты
- *   node generate-dummies.js --size 1MB --type random # конкретный размер
+ * Usage:
+ *   node generate-dummies.js                          # all presets
+ *   node generate-dummies.js --size 1MB --type random # specific size
  *   node generate-dummies.js --size 50KB --type allure
- *   node generate-dummies.js --list                   # показать пресеты
- *   node generate-dummies.js --output ./my-dummies    # указать папку
+ *   node generate-dummies.js --list                   # show presets
+ *   node generate-dummies.js --output ./my-dummies    # output directory
  *
- * Пресеты размеров (без --size):
- *   tiny    10 KB   — быстрый smoke-тест (1-2 фрейма Q4)
- *   small   50 KB   — минимальный Allure-отчёт (~6 фреймов Q4)
- *   medium  500 KB  — типичный мини-отчёт (~54 фрейма Q4)
- *   large   5 MB    — средний Allure-отчёт (~540 фреймов Q4, ~5 мин)
- *   xlarge  50 MB   — полноценный отчёт (~5400 фреймов Q4, ~45 мин)
+ * Size presets (without --size):
+ *   tiny    10 KB   — quick smoke test (1-2 frames Q4)
+ *   small   50 KB   — minimal Allure report (~6 frames Q4)
+ *   medium  500 KB  — typical mini report (~54 frames Q4)
+ *   large   5 MB    — medium Allure report (~540 frames Q4, ~5 min)
+ *   xlarge  50 MB   — full report (~5400 frames Q4, ~45 min)
  */
 
 const fs = require('fs');
@@ -44,24 +43,24 @@ function hasFlag(name) {
 }
 
 const PRESETS = [
-    { name: 'tiny', rawSize: 10 * 1024, desc: '10 KB — smoke-тест (1-2 фрейма Q4)' },
-    { name: 'small', rawSize: 50 * 1024, desc: '50 KB — мини Allure (~6 фреймов Q4)' },
-    { name: 'medium', rawSize: 500 * 1024, desc: '500 KB — типичный мини-отчёт (~54 фрейма Q4)' },
-    { name: 'large', rawSize: 5 * 1024 * 1024, desc: '5 MB — средний отчёт (~540 фреймов Q4, ~5 мин)' },
-    { name: 'xlarge', rawSize: 50 * 1024 * 1024, desc: '50 MB — полный отчёт (~5400 фреймов Q4, ~45 мин)' },
+    { name: 'tiny', rawSize: 10 * 1024, desc: '10 KB — smoke test (1-2 frames Q4)' },
+    { name: 'small', rawSize: 50 * 1024, desc: '50 KB — mini Allure (~6 frames Q4)' },
+    { name: 'medium', rawSize: 500 * 1024, desc: '500 KB — typical mini report (~54 frames Q4)' },
+    { name: 'large', rawSize: 5 * 1024 * 1024, desc: '5 MB — medium report (~540 frames Q4, ~5 min)' },
+    { name: 'xlarge', rawSize: 50 * 1024 * 1024, desc: '50 MB — full report (~5400 frames Q4, ~45 min)' },
 ];
 
 if (hasFlag('list') || hasFlag('help') || hasFlag('h')) {
-    console.log('Dummy Data Generator для PoC визуального пайплайна\n');
-    console.log('Использование:');
-    console.log('  node generate-dummies.js                          # все пресеты');
-    console.log('  node generate-dummies.js --size 1MB --type random # конкретный');
-    console.log('  node generate-dummies.js --preset medium          # один пресет');
-    console.log('  node generate-dummies.js --output ./my-dummies    # папка вывода\n');
-    console.log('Пресеты:');
+    console.log('Dummy Data Generator for visual pipeline PoC\n');
+    console.log('Usage:');
+    console.log('  node generate-dummies.js                          # all presets');
+    console.log('  node generate-dummies.js --size 1MB --type random # specific size');
+    console.log('  node generate-dummies.js --preset medium          # single preset');
+    console.log('  node generate-dummies.js --output ./my-dummies    # output dir\n');
+    console.log('Presets:');
     for (const p of PRESETS) console.log(`  ${p.name.padEnd(8)} ${p.desc}`);
-    console.log('\nТипы: allure, random, text');
-    console.log('Размеры: 10KB, 500KB, 1MB, 5MB, 50MB и т.д.');
+    console.log('\nTypes: allure, random, text');
+    console.log('Sizes: 10KB, 500KB, 1MB, 5MB, 50MB, etc.');
     process.exit(0);
 }
 
@@ -74,7 +73,7 @@ const requestedPreset = getArg('preset');
 function parseSize(s) {
     const m = s.match(/^(\d+(?:\.\d+)?)\s*(B|KB|MB|GB)?$/i);
     if (!m) {
-        console.error('Неверный формат размера: ' + s);
+        console.error('Invalid size format: ' + s);
         process.exit(1);
     }
     const num = parseFloat(m[1]);
@@ -115,10 +114,10 @@ function generateAllureResult(suiteName, testName, status) {
 function generateSteps(count) {
     const steps = [];
     const stepNames = [
-        'Подготовка тестовых данных', 'Инициализация контекста',
-        'Выполнение запроса', 'Проверка ответа', 'Очистка ресурсов',
-        'Валидация схемы', 'Проверка авторизации', 'Загрузка конфигурации',
-        'Подключение к БД', 'Отправка события',
+        'Prepare test data', 'Initialize context',
+        'Execute request', 'Verify response', 'Cleanup resources',
+        'Validate schema', 'Check authorization', 'Load configuration',
+        'Connect to database', 'Send event',
     ];
     for (let i = 0; i < count; i++) {
         steps.push({
@@ -170,7 +169,7 @@ function generateLogAttachment(lines) {
 // ── Generator functions ─────────────────────────────────
 
 function generateAllure(targetSize, outDir) {
-    console.log(`\nГенерация Allure-подобных данных (~${formatSize(targetSize)})...`);
+    console.log(`\nGenerating Allure-like data (~${formatSize(targetSize)})...`);
     fs.mkdirSync(outDir, { recursive: true });
 
     const suites = [
@@ -257,7 +256,7 @@ function generateAllure(targetSize, outDir) {
 }
 
 function generateRandom(targetSize, outDir) {
-    console.log(`\nГенерация случайных бинарных данных (~${formatSize(targetSize)})...`);
+    console.log(`\nGenerating random binary data (~${formatSize(targetSize)})...`);
     fs.mkdirSync(outDir, { recursive: true });
 
     const fname = `random-${formatSize(targetSize).replace(/\s+/g, '')}.bin`;
@@ -278,7 +277,7 @@ function generateRandom(targetSize, outDir) {
 }
 
 function generateText(targetSize, outDir) {
-    console.log(`\nГенерация текстовых данных (~${formatSize(targetSize)})...`);
+    console.log(`\nGenerating text data (~${formatSize(targetSize)})...`);
     fs.mkdirSync(outDir, { recursive: true });
 
     const files = [];
@@ -383,13 +382,13 @@ function cleanDir(dir) {
 // ── Main ────────────────────────────────────────────────
 function run() {
     console.log('╔══════════════════════════════════════════════╗');
-    console.log('║    Dummy Data Generator для PoC пайплайна   ║');
+    console.log('║     Dummy Data Generator for PoC Pipeline   ║');
     console.log('╚══════════════════════════════════════════════╝');
 
     const generators = { allure: generateAllure, random: generateRandom, text: generateText };
     const gen = generators[requestedType];
     if (!gen) {
-        console.error('Неизвестный тип: ' + requestedType + '. Доступные: allure, random, text');
+        console.error('Unknown type: ' + requestedType + '. Available: allure, random, text');
         process.exit(1);
     }
 
@@ -400,7 +399,7 @@ function run() {
     } else if (requestedPreset) {
         const p = PRESETS.find(p => p.name === requestedPreset);
         if (!p) {
-            console.error('Неизвестный пресет: ' + requestedPreset + '. Доступные: ' + PRESETS.map(p => p.name).join(', '));
+            console.error('Unknown preset: ' + requestedPreset + '. Available: ' + PRESETS.map(p => p.name).join(', '));
             process.exit(1);
         }
         targets = [p];
@@ -408,9 +407,9 @@ function run() {
         targets = PRESETS;
     }
 
-    console.log(`Тип данных: ${requestedType}`);
-    console.log(`Папка вывода: ${path.resolve(outputDir)}`);
-    console.log(`Пресетов: ${targets.length}`);
+    console.log(`Data type: ${requestedType}`);
+    console.log(`Output dir: ${path.resolve(outputDir)}`);
+    console.log(`Presets: ${targets.length}`);
 
     const results = [];
 
@@ -425,12 +424,12 @@ function run() {
         const est = estimateFrames(gzSize);
 
         console.log(`\n─── ${target.name} (${target.desc || ''}) ───`);
-        console.log(`  Файлов: ${info.fileCount}`);
-        console.log(`  Raw размер: ${formatSize(info.totalSize)}`);
-        console.log(`  tar.gz: ${formatSize(gzSize)} (сжатие: ${(gzSize / info.totalSize * 100).toFixed(0)}%)`);
-        console.log(`  Q4:  ${est.q4Frames} фреймов, ~${est.q4Time < 60 ? est.q4Time.toFixed(0) + ' сек' : (est.q4Time / 60).toFixed(1) + ' мин'}`);
-        console.log(`  RGB: ${est.rgbFrames} фреймов, ~${est.rgbTime < 60 ? est.rgbTime.toFixed(0) + ' сек' : (est.rgbTime / 60).toFixed(1) + ' мин'}`);
-        console.log(`  Архив: ${tarGzFile}`);
+        console.log(`  Files: ${info.fileCount}`);
+        console.log(`  Raw size: ${formatSize(info.totalSize)}`);
+        console.log(`  tar.gz: ${formatSize(gzSize)} (ratio: ${(gzSize / info.totalSize * 100).toFixed(0)}%)`);
+        console.log(`  Q4:  ${est.q4Frames} frames, ~${est.q4Time < 60 ? est.q4Time.toFixed(0) + ' sec' : (est.q4Time / 60).toFixed(1) + ' min'}`);
+        console.log(`  RGB: ${est.rgbFrames} frames, ~${est.rgbTime < 60 ? est.rgbTime.toFixed(0) + ' sec' : (est.rgbTime / 60).toFixed(1) + ' min'}`);
+        console.log(`  Archive: ${tarGzFile}`);
 
         results.push({
             preset: target.name,
@@ -441,24 +440,24 @@ function run() {
             tarGzFile,
         });
 
-        // Сырые файлы остаются в subDir — полезно для инспекции
+        // Raw files remain in subDir — useful for inspection
     }
 
-    // Итоговая таблица
+    // Summary table
     console.log('\n╔══════════════════════════════════════════════════════════════════╗');
-    console.log('║                      ИТОГОВАЯ ТАБЛИЦА                          ║');
+    console.log('║                        SUMMARY TABLE                           ║');
     console.log('╠══════════╦══════════╦══════════╦════════╦════════╦══════════════╣');
-    console.log('║ Пресет   ║ Raw      ║ tar.gz   ║ Q4 фр. ║ RGB фр.║ Q4 время    ║');
+    console.log('║ Preset   ║ Raw      ║ tar.gz   ║ Q4 fr. ║ RGB fr.║ Q4 time     ║');
     console.log('╠══════════╬══════════╬══════════╬════════╬════════╬══════════════╣');
     for (const r of results) {
-        const timeStr = r.q4Time < 60 ? `${r.q4Time.toFixed(0)} сек` :
-            r.q4Time < 3600 ? `${(r.q4Time / 60).toFixed(1)} мин` :
-                `${(r.q4Time / 3600).toFixed(1)} ч`;
+        const timeStr = r.q4Time < 60 ? `${r.q4Time.toFixed(0)} sec` :
+            r.q4Time < 3600 ? `${(r.q4Time / 60).toFixed(1)} min` :
+                `${(r.q4Time / 3600).toFixed(1)} hr`;
         console.log(`║ ${r.preset.padEnd(8)} ║ ${formatSize(r.rawSize).padEnd(8)} ║ ${formatSize(r.gzSize).padEnd(8)} ║ ${String(r.q4Frames).padEnd(6)} ║ ${String(r.rgbFrames).padEnd(6)} ║ ${timeStr.padEnd(12)} ║`);
     }
     console.log('╚══════════╩══════════╩══════════╩════════╩════════╩══════════════╝');
 
-    console.log('\nГотово! Используй tar.gz файлы с энкодером:');
+    console.log('\nDone! Use tar.gz files with the encoder:');
     console.log(`  node src/vm-encoder.js dummies/${requestedType}-small.tar.gz`);
 }
 

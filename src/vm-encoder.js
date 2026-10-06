@@ -3,19 +3,19 @@
 
 /**
  * ===== VISUAL ENCODER v2 =====
- * Кодирует файл в анимацию цветных блоков на HTML canvas.
+ * Encodes a file into an animated colored block grid on HTML canvas.
  *
- * Режимы:
- *   q4  — 4 уровня на канал (0,85,170,255), 6 бит/ячейка.
- *          Устойчив к lossy сжатию (getDisplayMedia/видеозахват).
- *          ~9.1 KB/фрейм.
- *   rgb — классический 3 байта на ячейку (lossless скриншоты).
- *          ~36.4 KB/фрейм.
+ * Modes:
+ *   q4  — 4 levels per channel (0,85,170,255), 6 bits/cell.
+ *          Resilient to lossy compression (getDisplayMedia / screen capture).
+ *          ~9.1 KB/frame.
+ *   rgb — classic 3 bytes per cell (lossless screenshots only).
+ *          ~36.4 KB/frame.
  *
- * Использование:
- *   node vm-encoder-v2.js results.tar.gz                    # Q4 по умолчанию
- *   node vm-encoder-v2.js results.tar.gz --mode rgb          # классический режим
- *   node vm-encoder-v2.js results.tar.gz --block 8 --output frames.html
+ * Usage:
+ *   node vm-encoder.js results.tar.gz                    # Q4 by default
+ *   node vm-encoder.js results.tar.gz --mode rgb          # classic mode
+ *   node vm-encoder.js results.tar.gz --block 8 --output frames.html
  */
 
 const fs = require('fs');
@@ -87,11 +87,11 @@ console.log('Est. capture time at 500ms/frame: ~' + estMinutes + ' min');
 const b64 = data.toString('base64');
 const htmlSizeMB = (b64.length * 1.05) / 1048576;
 if (htmlSizeMB > 200) {
-    console.error('\n⚠  HTML будет ~' + htmlSizeMB.toFixed(0) + ' MB — браузер может не потянуть.');
+    console.error('\n⚠  HTML will be ~' + htmlSizeMB.toFixed(0) + ' MB — browser may not handle it.');
     process.exit(1);
 }
 if (htmlSizeMB > 50) {
-    console.warn('\n⚠  HTML будет ~' + htmlSizeMB.toFixed(0) + ' MB — может грузиться медленно.');
+    console.warn('\n⚠  HTML will be ~' + htmlSizeMB.toFixed(0) + ' MB — may load slowly.');
 }
 
 // ── Q4 magic values ─────────────────────────────────────
@@ -330,9 +330,9 @@ fs.writeFileSync(OUTPUT, html);
 const outSize = Buffer.byteLength(html);
 console.log('\n✅ ' + OUTPUT + '  (' + (outSize / 1048576).toFixed(2) + ' MB)');
 console.log('');
-console.log('Дальше:');
-console.log('  1. Открой ' + OUTPUT + ' в браузере внутри ВМ');
-console.log('  2. Нажми Play + Loop (или Space + L)');
-console.log('  3. На хосте открой host-decoder-v2.html');
-console.log('  4. Нажми «Start Capture» и выбери окно ВМ');
-console.log('  5. Дождись 100% и скачай файл');
+console.log('Next steps:');
+console.log('  1. Open ' + OUTPUT + ' in the browser inside the VM');
+console.log('  2. Press Play + Loop (or Space + L)');
+console.log('  3. On the host, open host-decoder.html');
+console.log('  4. Click "Start Capture" and select the VM window');
+console.log('  5. Wait for 100% and download the file');
