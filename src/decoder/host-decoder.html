@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Visual Decoder v2 — Auto Capture</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#12121a;color:#ddd;font:13px/1.5 monospace;padding:20px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin-bottom:4px}
+p.sub{color:#888;margin-bottom:16px}
+
+.section{background:#1a1a24;border:1px solid #333;border-radius:8px;padding:16px;margin-bottom:16px}
+.section h2{font-size:15px;margin-bottom:10px;color:#aaa}
+
+#capture-area{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start}
+#preview-wrap{position:relative;background:#000;border-radius:6px;overflow:hidden;max-width:480px;flex:1;min-width:300px}
+#preview{width:100%;display:block;border-radius:6px}
+#preview-label{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.7);padding:2px 8px;border-radius:3px;font-size:11px}
+
+#capture-controls{display:flex;flex-direction:column;gap:8px;min-width:200px}
+#capture-controls button{padding:8px 20px;font:14px monospace;cursor:pointer;border-radius:4px;border:1px solid #444}
+#btn-start{background:#060;color:#0f0;border-color:#0a0}
+#btn-start:hover{background:#080}
+#btn-stop{background:#600;color:#f00;border-color:#a00}
+#btn-stop:hover{background:#800}
+#btn-start:disabled,#btn-stop:disabled{opacity:.35;cursor:default}
+
+.bar-wrap{background:#222;height:22px;border-radius:4px;overflow:hidden;margin:4px 0 10px}
+.bar-fill{background:linear-gradient(90deg,#0a0,#0f0);height:100%;width:0;transition:width .3s}
+
+#stats{font-size:12px;color:#999;margin-top:6px}
+#stats span{color:#eee}
+
+#log{
+  background:#0a0a12;border:1px solid #222;border-radius:6px;padding:10px;
+  max-height:350px;overflow-y:auto;font-size:12px;white-space:pre-wrap;margin-bottom:12px;
+}
+.ok{color:#0c0}.err{color:#f44}.warn{color:#fa0}.dbg{color:#88f}
+
+button{padding:6px 18px;font:14px monospace;cursor:pointer;background:#222;color:#eee;border:1px solid #444;border-radius:4px;margin:2px}
+button:hover{background:#333}
+button:disabled{opacity:.35;cursor:default}
+
+#drop{
+  border:3px dashed #444;border-radius:10px;padding:36px 20px;text-align:center;
+  cursor:pointer;transition:border-color .2s,background .2s;margin-bottom:12px;
+}
+#drop:hover,#drop.over{border-color:#0f0;background:rgba(0,255,0,.04)}
+
+details summary{cursor:pointer;color:#888;margin-bottom:8px}
+details summary:hover{color:#ccc}
+
+canvas{display:none}
+
+.rate-btns button.active{background:#060;border-color:#0a0}
+#mode-indicator{display:inline-block;padding:2px 8px;border-radius:3px;font-size:12px;font-weight:bold}
+.mode-q4{background:#530;color:#fa0}
+.mode-rgb{background:#035;color:#0af}
+.mode-unknown{background:#333;color:#888}
+</style>
+</head>
+<body>
+
+<h1>📦 Visual Decoder v2 — Auto Capture</h1>
+<p class="sub">Auto screen capture via getDisplayMedia, or manual input (drag & drop / Ctrl+V / file).</p>
+
+<!-- ══════ CAPTURE SECTION ══════ -->
+<div class="section">
+  <h2>🎥 Screen Capture</h2>
+  <div id="capture-area">
+    <div id="preview-wrap">
+      <video id="preview" muted playsinline></video>
+      <div id="preview-label">Preview</div>
+    </div>
+    <div id="capture-controls">
+      <button id="btn-start" onclick="startCapture()">▶ Start Capture</button>
+      <button id="btn-stop" onclick="stopCapture()" disabled>⏹ Stop</button>
+      <div>
+        <span style="font-size:12px;color:#888">Capture interval:</span>
+        <div class="rate-btns">
+          <button onclick="setRate(100)" id="r100">100ms</button>
+          <button onclick="setRate(200)" id="r200" class="active">200ms</button>
+          <button onclick="setRate(500)" id="r500">500ms</button>
+          <button onclick="setRate(1000)" id="r1000">1s</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:#888;margin-top:8px">
+        Mode: <span id="mode-indicator" class="mode-unknown">detecting…</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ PROGRESS ══════ -->
+<div class="section">
+  <h2>📊 Progress</h2>
+  <span id="pct">0 / ? frames</span>
+  <div class="bar-wrap"><div class="bar-fill" id="bar"></div></div>
+  <div id="stats">
+    CRC OK: <span id="st-ok">0</span> |
+    CRC fail: <span id="st-fail">0</span> |
+    No grid: <span id="st-miss">0</span> |
+    Dupes: <span id="st-dupe">0</span> |
+    Captures: <span id="st-total">0</span>
+  </div>
+</div>
+
+<!-- ══════ LOG ══════ -->
+<div id="log"></div>
+
+<!-- ══════ ACTIONS ══════ -->
+<button onclick="download()" id="btnDl" disabled>💾 Download File</button>
+<button onclick="reset_()">🗑 Reset</button>
+
+<!-- ══════ MANUAL INPUT ══════ -->
+<details style="margin-top:16px">
+  <summary>📁 Manual Input (drag & drop / Ctrl+V / file)</summary>
+  <div class="section" style="margin-top:8px">
+    <div id="drop" onclick="fi.click()">
+      📁 Drop, click or <kbd>Ctrl+V</kbd>
+    </div>
+    <input type="file" id="fi" multiple accept="image/*" style="display:none">
+    <div>
+      <span style="font-size:12px;color:#888">Tolerance (±RGB threshold):</span>
+      <button class="tol-btn active" id="tol-3" onclick="setTolerance(3)">±3 (PNG)</button>
+      <button class="tol-btn" id="tol-10" onclick="setTolerance(10)">±10</button>
+      <button class="tol-btn" id="tol-20" onclick="setTolerance(20)">±20</button>
+      <button class="tol-btn" id="tol-35" onclick="setTolerance(35)">±35</button>
+      <style>.tol-btn.active{background:#060;border-color:#0a0}</style>
+    </div>
+  </div>
+</details>
+
+<canvas id="cv"></canvas>
+
+<script>
+// ═══════════════════════════════════════════════════════════
+//  CORE DECODER ENGINE — supports Q4 and RGB modes
+// ═══════════════════════════════════════════════════════════
+
+// ── Magic patterns ──
+const RGB_MAGIC0 = [0xDE, 0xAD, 0x01];
+const RGB_MAGIC1 = [0xBE, 0xEF, 0x02];
+const Q4_MAGIC0_VAL = 55;  // → (255, 85, 255)
+const Q4_MAGIC1_VAL = 28;  // → (85, 255, 0)
+
+let TOLERANCE = 3;  // for manual RGB mode input
+let frames = {};
+let totalFrames = null;
+let detectedMode = null;  // 'q4' or 'rgb'
+let cachedScale = null;
+let cachedOrigin = null;  // { gx, gy } for auto-capture position caching
+
+// Stats
+let statOk = 0, statFail = 0, statMiss = 0, statDupe = 0, statTotal = 0;
+
+// Capture state
+let captureStream = null;
+let captureTimer = null;
+let captureRate = 200;
+let captureVideo = null;
+let grabCanvas = null;
+let grabCtx = null;
+
+// UI refs
+const logEl = document.getElementById('log');
+const bar = document.getElementById('bar');
+const pctEl = document.getElementById('pct');
+const fi = document.getElementById('fi');
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d', { willReadFrequently: true });
+
+function log(msg, cls) {
+    const s = document.createElement('span');
+    s.className = cls || '';
+    s.textContent = msg + '\n';
+    logEl.appendChild(s);
+    logEl.scrollTop = logEl.scrollHeight;
+}
+
+function updateStats() {
+    document.getElementById('st-ok').textContent = statOk;
+    document.getElementById('st-fail').textContent = statFail;
+    document.getElementById('st-miss').textContent = statMiss;
+    document.getElementById('st-dupe').textContent = statDupe;
+    document.getElementById('st-total').textContent = statTotal;
+}
+
+// ── CRC-32 ──
+function crc32(buf) {
+    let c = 0xFFFFFFFF;
+    for (let i = 0; i < buf.length; i++) { c ^= buf[i]; for (let j = 0; j < 8; j++) c = (c >>> 1) ^ (c & 1 ? 0xEDB88320 : 0); }
+    return (c ^ 0xFFFFFFFF) >>> 0;
+}
+
+// ── Pixel reader ──
+function px(d, x, y) {
+    if (x < 0 || y < 0 || x >= d.width || y >= d.height) return [0, 0, 0];
+    const i = (y * d.width + x) * 4;
+    return [d.data[i], d.data[i+1], d.data[i+2]];
+}
+
+function matchRGB(p, t) {
+    return Math.abs(p[0]-t[0]) <= TOLERANCE &&
+           Math.abs(p[1]-t[1]) <= TOLERANCE &&
+           Math.abs(p[2]-t[2]) <= TOLERANCE;
+}
+
+// Q4 quantize: pixel → nearest level (0-3)
+function q4level(v) { return Math.max(0, Math.min(3, Math.round(v / 85))); }
+
+// Q4: decode one cell to 6-bit value
+function q4val(r, g, b) {
+    return (q4level(r) << 4) | (q4level(g) << 2) | q4level(b);
+}
+
+// ═══════════════════════════════════════════════════════════
+//  GRID DETECTION — find magic cells, compute float block size
+// ═══════════════════════════════════════════════════════════
+
+function isQ4Magic0(r, g, b) {
+    // Q4 magic 0: val 55 → (255, 85, 255) → levels (3, 1, 3)
+    return q4level(r) === 3 && q4level(g) === 1 && q4level(b) === 3;
+}
+
+function isQ4Magic1(r, g, b) {
+    // Q4 magic 1: val 28 → (85, 255, 0) → levels (1, 3, 0)
+    return q4level(r) === 1 && q4level(g) === 3 && q4level(b) === 0;
+}
+
+function findMagicCells(img, mode) {
+    const W = img.width, H = img.height;
+    const isM0 = mode === 'q4'
+        ? (x, y) => isQ4Magic0(...px(img, x, y))
+        : (x, y) => matchRGB(px(img, x, y), RGB_MAGIC0);
+    const isM1 = mode === 'q4'
+        ? (x, y) => isQ4Magic1(...px(img, x, y))
+        : (x, y) => matchRGB(px(img, x, y), RGB_MAGIC1);
+
+    // If we have a cached origin, try there first (±small offset)
+    const origins = [];
+    if (cachedOrigin) {
+        origins.push({ sx: Math.max(0, cachedOrigin.gx - 5), sy: Math.max(0, cachedOrigin.gy - 5),
+                        ex: Math.min(W, cachedOrigin.gx + 50), ey: Math.min(H, cachedOrigin.gy + 50) });
+    }
+    origins.push({ sx: 0, sy: 0, ex: W, ey: H }); // full scan fallback
+
+    for (const region of origins) {
+        let mx = -1, my = -1;
+        for (let y = region.sy; y < region.ey && mx < 0; y++) {
+            for (let x = region.sx; x < region.ex && mx < 0; x++) {
+                if (isM0(x, y)) { mx = x; my = y; }
+            }
+        }
+        if (mx < 0) continue;
+
+        // Measure MAGIC0 cell boundaries
+        let l0 = mx; while (l0 > 0 && isM0(l0 - 1, my)) l0--;
+        let r0 = mx; while (r0 < W - 1 && isM0(r0 + 1, my)) r0++;
+        let t0 = my; while (t0 > 0 && isM0(mx, t0 - 1)) t0--;
+        let b0 = my; while (b0 < H - 1 && isM0(mx, b0 + 1)) b0++;
+
+        const cellW = r0 - l0 + 1;
+        const cellH = b0 - t0 + 1;
+        if (cellW < 3 || cellH < 3 || cellW > 200 || cellH > 200) continue;
+
+        // Find MAGIC1 cell (immediately right of MAGIC0)
+        const midY = Math.round((t0 + b0) / 2);
+        let l1 = r0 + 1;
+        const maxScan = r0 + cellW * 2;
+        while (l1 <= maxScan && l1 < W && !isM1(l1, midY)) l1++;
+        if (l1 > maxScan || l1 >= W) continue;
+        let r1 = l1; while (r1 < W - 1 && isM1(r1 + 1, midY)) r1++;
+
+        // Compute float block size from multiple measurements
+        const c0x = (l0 + r0) / 2;
+        const c1x = (l1 + r1) / 2;
+        const blkFromCenters = c1x - c0x;
+        const m1cellW = r1 - l1 + 1;
+        const blkFromSpan = (r1 - l0 + 1) / 2;
+        const blkFromWidths = (cellW + m1cellW) / 2;
+        const blkF = (blkFromCenters + blkFromSpan + blkFromWidths) / 3;
+
+        if (blkF < 2 || blkF > 200) continue;
+
+        return { gx: l0, gy: t0, blkF, cellW, cellH };
+    }
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MODE DETECTION — try Q4 first, then RGB
+// ═══════════════════════════════════════════════════════════
+
+function detectModeAndGrid(img) {
+    // If mode is already known, search for that mode's magic
+    if (detectedMode) {
+        const magic = findMagicCells(img, detectedMode);
+        if (magic) return { mode: detectedMode, magic };
+    }
+
+    // Try Q4 first (it's the v2 default)
+    let magic = findMagicCells(img, 'q4');
+    if (magic) return { mode: 'q4', magic };
+
+    // Fallback to RGB
+    magic = findMagicCells(img, 'rgb');
+    if (magic) return { mode: 'rgb', magic };
+
+    return null;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FRAME DECODE — Q4 and RGB
+// ═══════════════════════════════════════════════════════════
+
+function tryDecodeQ4(img, gx, gy, bx, by) {
+    function rc(col, row) {
+        const cx = Math.round(gx + (col + 0.5) * bx);
+        const cy = Math.round(gy + (row + 0.5) * by);
+        return px(img, cx, cy);
+    }
+
+    // Read Q4 header cells
+    function q4h(col) { return q4val(...rc(col, 0)); }
+
+    // Verify magic
+    if (q4h(0) !== Q4_MAGIC0_VAL || q4h(1) !== Q4_MAGIC1_VAL) return null;
+
+    // Frame index (3 cells = 18 bits)
+    const frameIdx = (q4h(2) << 12) | (q4h(3) << 6) | q4h(4);
+    // Total frames
+    const frameTot = (q4h(5) << 12) | (q4h(6) << 6) | q4h(7);
+    // Data length
+    const dataLen = (q4h(8) << 12) | (q4h(9) << 6) | q4h(10);
+    // CRC32 (6 cells)
+    const v11=q4h(11), v12=q4h(12), v13=q4h(13), v14=q4h(14), v15=q4h(15), v16=q4h(16);
+    const expectCrc = ((v11 << 26) | (v12 << 20) | (v13 << 14) | (v14 << 8) | (v15 << 2) | (v16 >> 4)) >>> 0;
+    // Grid dims
+    const cols = (q4h(17) << 6) | q4h(18);
+    const rows = (q4h(19) << 6) | q4h(20);
+    const blockSz = q4h(21);
+
+    // Sanity
+    if (frameTot < 1 || frameTot > 999999) return null;
+    if (cols < 10 || cols > 300) return null;
+    if (rows < 5 || rows > 200) return null;
+    if (dataLen < 0 || dataLen > Math.floor(cols * (rows-1) / 4) * 3 + 3) return null;
+    if (frameIdx < 0 || frameIdx >= frameTot) return null;
+
+    // Read Q4 data: 4 cells → 3 bytes
+    const fd = new Uint8Array(dataLen);
+    let bi = 0, ci = 0;
+    const totalCells = cols * (rows - 1);
+
+    while (ci < totalCells && bi < dataLen) {
+        const vals = [];
+        for (let k = 0; k < 4 && ci < totalCells; k++, ci++) {
+            const r = Math.floor(ci / cols) + 1;
+            const c = ci % cols;
+            vals.push(q4val(...rc(c, r)));
+        }
+        // Unpack 4 × 6-bit values → 3 bytes
+        const v0 = vals[0] || 0, v1 = vals[1] || 0, v2 = vals[2] || 0, v3 = vals[3] || 0;
+        const b0 = (v0 << 2) | (v1 >> 4);
+        const b1 = ((v1 & 0xF) << 4) | (v2 >> 2);
+        const b2 = ((v2 & 3) << 6) | v3;
+        if (bi < dataLen) fd[bi++] = b0;
+        if (bi < dataLen) fd[bi++] = b1;
+        if (bi < dataLen) fd[bi++] = b2;
+    }
+
+    const actualCrc = crc32(fd);
+    return {
+        frameIdx, frameTot, dataLen, fd,
+        crcOk: actualCrc === expectCrc,
+        expectCrc, actualCrc,
+        cols, rows, blockSz,
+        blkX: bx, blkY: by,
+        mode: 'q4'
+    };
+}
+
+function tryDecodeRGB(img, gx, gy, bx, by) {
+    function rc(col, row) {
+        const cx = Math.round(gx + (col + 0.5) * bx);
+        const cy = Math.round(gy + (row + 0.5) * by);
+        return px(img, cx, cy);
+    }
+
+    const h2 = rc(2, 0), h3 = rc(3, 0), h4 = rc(4, 0);
+    const h5 = rc(5, 0), h6 = rc(6, 0), h7 = rc(7, 0);
+
+    const frameIdx  = (h2[0] << 16) | (h2[1] << 8) | h2[2];
+    const frameTot  = (h3[0] << 16) | (h3[1] << 8) | h3[2];
+    const dataLen   = (h4[0] << 16) | (h4[1] << 8) | h4[2];
+    const expectCrc = ((h5[0] << 24) | (h5[1] << 16) | (h5[2] << 8) | h6[0]) >>> 0;
+    const cols      = h6[1];
+    const rows      = h6[2];
+    const blockSz   = h7[0];
+
+    if (frameTot < 1 || frameTot > 999999) return null;
+    if (cols < 10 || cols > 300) return null;
+    if (rows < 5 || rows > 200) return null;
+    if (dataLen < 1 || dataLen > cols * rows * 3) return null;
+    if (frameIdx < 0 || frameIdx >= frameTot) return null;
+
+    const fd = new Uint8Array(dataLen);
+    let bi = 0;
+    for (let r = 1; r < rows && bi < dataLen; r++) {
+        for (let c = 0; c < cols && bi < dataLen; c++) {
+            const p = rc(c, r);
+            if (bi < dataLen) fd[bi++] = p[0];
+            if (bi < dataLen) fd[bi++] = p[1];
+            if (bi < dataLen) fd[bi++] = p[2];
+        }
+    }
+
+    const actualCrc = crc32(fd);
+    return {
+        frameIdx, frameTot, dataLen, fd,
+        crcOk: actualCrc === expectCrc,
+        expectCrc, actualCrc,
+        cols, rows, blockSz,
+        blkX: bx, blkY: by,
+        mode: 'rgb'
+    };
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MAIN DECODE PIPELINE — with CRC-guided refinement
+// ═══════════════════════════════════════════════════════════
+
+function decodeFrame(img, label, verbose) {
+    const detected = detectModeAndGrid(img);
+    if (!detected) {
+        if (verbose) log('  ✗ ' + label + ' — grid not found', 'err');
+        return null;
+    }
+
+    const { mode, magic } = detected;
+    const { gx, gy, blkF, cellW, cellH } = magic;
+
+    if (!detectedMode) {
+        detectedMode = mode;
+        const el = document.getElementById('mode-indicator');
+        el.textContent = mode.toUpperCase();
+        el.className = 'mode-' + mode;
+        log('Mode detected: ' + mode.toUpperCase(), 'ok');
+    }
+
+    // Cache origin for faster subsequent scans
+    cachedOrigin = { gx, gy };
+
+    const tryDec = mode === 'q4' ? tryDecodeQ4 : tryDecodeRGB;
+
+    // 1. Try cached scale first
+    if (cachedScale) {
+        const r = tryDec(img, gx, gy, cachedScale.bx, cachedScale.by);
+        if (r && r.crcOk) return r;
+    }
+
+    // 2. Try measured block size
+    let result = tryDec(img, gx, gy, blkF, blkF);
+    if (result && result.crcOk) {
+        cachedScale = { bx: blkF, by: blkF };
+        return result;
+    }
+
+    // 3. Try with cellH for Y
+    result = tryDec(img, gx, gy, blkF, cellH);
+    if (result && result.crcOk) {
+        cachedScale = { bx: blkF, by: cellH };
+        return result;
+    }
+
+    // 4. CRC-guided 1D refinement
+    const avg = blkF;
+    for (let d = 0.01; d <= 2.0; d += 0.01) {
+        for (const sign of [1, -1]) {
+            const b = avg + sign * d;
+            result = tryDec(img, gx, gy, b, b);
+            if (result && result.crcOk) {
+                if (verbose) log('  ✅ Refined block: ' + b.toFixed(3) + 'px', 'ok');
+                cachedScale = { bx: b, by: b };
+                return result;
+            }
+        }
+    }
+
+    // 5. 2D refinement (rare)
+    for (let dx = -1.5; dx <= 1.5; dx += 0.05) {
+        for (let dy = -1.5; dy <= 1.5; dy += 0.05) {
+            if (Math.abs(dx - dy) < 0.01) continue;
+            result = tryDec(img, gx, gy, blkF + dx, cellH + dy);
+            if (result && result.crcOk) {
+                if (verbose) log('  ✅ 2D: bx=' + (blkF + dx).toFixed(3) + ' by=' + (cellH + dy).toFixed(3), 'ok');
+                cachedScale = { bx: blkF + dx, by: cellH + dy };
+                return result;
+            }
+        }
+    }
+
+    // Return best failed attempt
+    result = tryDec(img, gx, gy, blkF, blkF);
+    return result;
+}
+
+// ═══════════════════════════════════════════════════════════
+//  FRAME COLLECTION
+// ═══════════════════════════════════════════════════════════
+
+function collectFrame(result, label) {
+    if (!result) {
+        statMiss++;
+        updateStats();
+        return;
+    }
+
+    if (totalFrames === null) totalFrames = result.frameTot;
+
+    if (result.crcOk) {
+        if (frames[result.frameIdx]) {
+            statDupe++;
+        } else {
+            frames[result.frameIdx] = result.fd;
+            statOk++;
+            // Log every 10th new frame or first few
+            const n = Object.keys(frames).length;
+            if (n <= 5 || n % 10 === 0 || n === totalFrames) {
+                log('  ✓ frame ' + (result.frameIdx + 1) + '/' + totalFrames + ' (' + result.dataLen + ' B) — total ' + n + '/' + totalFrames, 'ok');
+            }
+        }
+    } else {
+        statFail++;
+    }
+
+    updateStats();
+    updateProgress();
+}
+
+function updateProgress() {
+    const n = Object.keys(frames).length;
+    const t = totalFrames || '?';
+    pctEl.textContent = n + ' / ' + t + ' frames';
+    if (totalFrames) {
+        const pct = (n / totalFrames * 100);
+        bar.style.width = pct.toFixed(1) + '%';
+        if (n === totalFrames) {
+            document.getElementById('btnDl').disabled = false;
+            log('\n🎉 All ' + totalFrames + ' frames collected! Click "Download File".', 'ok');
+            // Auto-stop capture
+            if (captureStream) stopCapture();
+        }
+    }
+}
+
+// ═══════════════════════════════════════════════════════════
+//  getDisplayMedia AUTO-CAPTURE
+// ═══════════════════════════════════════════════════════════
+
+async function startCapture() {
+    try {
+        captureStream = await navigator.mediaDevices.getDisplayMedia({
+            video: {
+                cursor: 'never',
+                width: { ideal: 1920 },
+                height: { ideal: 1080 },
+                frameRate: { ideal: 10 }
+            },
+            audio: false
+        });
+    } catch (e) {
+        log('❌ getDisplayMedia rejected: ' + e.message, 'err');
+        return;
+    }
+
+    captureVideo = document.createElement('video');
+    captureVideo.srcObject = captureStream;
+    captureVideo.muted = true;
+
+    // Show preview
+    document.getElementById('preview').srcObject = captureStream;
+    document.getElementById('preview').play().catch(() => {});
+
+    await captureVideo.play();
+
+    // Wait a moment for video to stabilize
+    await new Promise(r => setTimeout(r, 500));
+
+    // Setup grab canvas
+    grabCanvas = document.createElement('canvas');
+    grabCanvas.width = captureVideo.videoWidth;
+    grabCanvas.height = captureVideo.videoHeight;
+    grabCtx = grabCanvas.getContext('2d', { willReadFrequently: true });
+
+    log('🎥 Capture started: ' + grabCanvas.width + '×' + grabCanvas.height + ' @ ' + captureRate + 'ms', 'ok');
+
+    document.getElementById('btn-start').disabled = true;
+    document.getElementById('btn-stop').disabled = false;
+
+    // Handle stream end (user clicks browser's "Stop sharing")
+    captureStream.getTracks()[0].addEventListener('ended', () => {
+        stopCapture();
+    });
+
+    // Start frame grabbing
+    captureTimer = setInterval(grabFrame, captureRate);
+}
+
+function grabFrame() {
+    if (!captureVideo || captureVideo.readyState < 2) return;
+
+    // Resize canvas if video dimensions changed
+    if (grabCanvas.width !== captureVideo.videoWidth || grabCanvas.height !== captureVideo.videoHeight) {
+        grabCanvas.width = captureVideo.videoWidth;
+        grabCanvas.height = captureVideo.videoHeight;
+        log('📐 Video resized: ' + grabCanvas.width + '×' + grabCanvas.height, 'dbg');
+        cachedScale = null;
+        cachedOrigin = null;
+    }
+
+    grabCtx.drawImage(captureVideo, 0, 0);
+    const imgData = grabCtx.getImageData(0, 0, grabCanvas.width, grabCanvas.height);
+    statTotal++;
+
+    const result = decodeFrame(imgData, 'capture-' + statTotal, false);
+    collectFrame(result, 'capture-' + statTotal);
+}
+
+function stopCapture() {
+    if (captureTimer) { clearInterval(captureTimer); captureTimer = null; }
+    if (captureStream) {
+        captureStream.getTracks().forEach(t => t.stop());
+        captureStream = null;
+    }
+    document.getElementById('preview').srcObject = null;
+    document.getElementById('btn-start').disabled = false;
+    document.getElementById('btn-stop').disabled = true;
+    log('⏹ Capture stopped. Total grabs: ' + statTotal, 'warn');
+}
+
+function setRate(ms) {
+    captureRate = ms;
+    document.querySelectorAll('.rate-btns button').forEach(b => b.classList.remove('active'));
+    const el = document.getElementById('r' + ms);
+    if (el) el.classList.add('active');
+    if (captureTimer) {
+        clearInterval(captureTimer);
+        captureTimer = setInterval(grabFrame, captureRate);
+    }
+    log('Capture rate: ' + ms + 'ms', 'dbg');
+}
+
+// ═══════════════════════════════════════════════════════════
+//  MANUAL INPUT — drag & drop, file picker, Ctrl+V
+// ═══════════════════════════════════════════════════════════
+
+async function processFile(file) {
+    return new Promise(resolve => {
+        const img = new Image();
+        img.onload = () => {
+            cv.width = img.width; cv.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            const imgData = ctx.getImageData(0, 0, img.width, img.height);
+            resolve(decodeFrame(imgData, file.name, true));
+        };
+        img.onerror = () => resolve(null);
+        img.src = URL.createObjectURL(file);
+    });
+}
+
+async function handleFiles(fileList) {
+    const files = [...fileList].sort((a, b) => a.name.localeCompare(b.name, undefined, { numeric: true }));
+    log('Processing ' + files.length + ' files… tolerance=±' + TOLERANCE);
+
+    for (const f of files) {
+        statTotal++;
+        const r = await processFile(f);
+        if (!r) { log('  ✗ ' + f.name + ' — frame not found', 'err'); statMiss++; }
+        else if (r.crcOk) {
+            if (frames[r.frameIdx]) {
+                log('  ⊘ ' + f.name + ' → frame ' + (r.frameIdx + 1) + ' (duplicate)', 'warn');
+                statDupe++;
+            } else {
+                frames[r.frameIdx] = r.fd;
+                statOk++;
+                log('  ✓ ' + f.name + ' → frame ' + (r.frameIdx + 1) + '/' + (r.frameTot) + ' (' + r.dataLen + ' B)', 'ok');
+            }
+            if (totalFrames === null) totalFrames = r.frameTot;
+        } else {
+            log('  ✗ ' + f.name + ' → frame ' + (r.frameIdx + 1) + ' CRC FAIL (expect 0x' +
+                r.expectCrc.toString(16).padStart(8, '0') + ' got 0x' + r.actualCrc.toString(16).padStart(8, '0') + ')', 'err');
+            statFail++;
+        }
+        updateStats();
+    }
+    updateProgress();
+}
+
+// ── Download ──
+function download() {
+    if (!totalFrames) return;
+    const parts = [];
+    let total = 0;
+    for (let i = 0; i < totalFrames; i++) {
+        if (!frames[i]) { log('Missing frame ' + (i + 1) + '!', 'err'); return; }
+        parts.push(frames[i]);
+        total += frames[i].length;
+    }
+    const out = new Uint8Array(total);
+    let off = 0;
+    for (const p of parts) { out.set(p, off); off += p.length; }
+
+    const blob = new Blob([out], { type: 'application/gzip' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'decoded.tar.gz';
+    a.click();
+    log('💾 Downloaded: decoded.tar.gz (' + (total / 1048576).toFixed(2) + ' MB)', 'ok');
+}
+
+function reset_() {
+    frames = {}; totalFrames = null; detectedMode = null;
+    cachedScale = null; cachedOrigin = null;
+    statOk = statFail = statMiss = statDupe = statTotal = 0;
+    logEl.textContent = '';
+    bar.style.width = '0';
+    pctEl.textContent = '0 / ? frames';
+    document.getElementById('btnDl').disabled = true;
+    document.getElementById('mode-indicator').textContent = 'detecting…';
+    document.getElementById('mode-indicator').className = 'mode-unknown';
+    updateStats();
+}
+
+function setTolerance(val) {
+    TOLERANCE = val;
+    cachedScale = null;
+    log('Tolerance = ±' + val, 'warn');
+    document.querySelectorAll('.tol-btn').forEach(b => b.classList.remove('active'));
+    const el = document.getElementById('tol-' + val);
+    if (el) el.classList.add('active');
+}
+
+// ── Drag & drop ──
+const drop = document.getElementById('drop');
+drop.addEventListener('dragover', e => { e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', () => drop.classList.remove('over'));
+drop.addEventListener('drop', e => { e.preventDefault(); drop.classList.remove('over'); handleFiles(e.dataTransfer.files); });
+fi.addEventListener('change', () => { handleFiles(fi.files); fi.value = ''; });
+
+// ── Ctrl+V paste ──
+let pasteCount = 0;
+document.addEventListener('paste', e => {
+    const items = e.clipboardData && e.clipboardData.items;
+    if (!items) return;
+    const images = [];
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            const blob = item.getAsFile();
+            if (blob) images.push(blob);
+        }
+    }
+    if (images.length === 0) return;
+    e.preventDefault();
+    const fileList = images.map(blob => {
+        pasteCount++;
+        const ext = blob.type === 'image/png' ? '.png' : '.jpg';
+        return new File([blob], 'paste-' + String(pasteCount).padStart(5, '0') + ext, { type: blob.type });
+    });
+    log('📋 Pasted: ' + fileList.length + ' image(s)', 'ok');
+    handleFiles(fileList);
+});
+</script>
+
+</body>
+</html>

@@ -5,11 +5,11 @@
   "license": "MIT",
   "private": true,
   "bin": {
-    "vm-encode": "src/vm-encoder.js",
+    "vm-encode": "src/encoder/vm-encoder.js",
     "generate-dummies": "scripts/generate-dummies.js"
   },
   "scripts": {
-    "encode": "node src/vm-encoder.js",
+    "encode": "node src/encoder/vm-encoder.js",
     "dummies": "node scripts/generate-dummies.js",
     "dummies:tiny": "node scripts/generate-dummies.js --preset tiny",
     "dummies:small": "node scripts/generate-dummies.js --preset small",
