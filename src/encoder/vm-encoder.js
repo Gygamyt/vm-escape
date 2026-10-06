@@ -23,13 +23,67 @@ const zlib = require('zlib');
 
 // ── Parse args ──────────────────────────────────────────
 const args = process.argv.slice(2);
-const inputFile = args.find(a => !a.startsWith('--'));
+
+function hasFlag(name) {
+    return args.includes('--' + name);
+}
+
+function showHelp() {
+    console.log(`
+  vm-escape encoder — encode any file into a visual pixel grid (HTML)
+
+  USAGE
+    node src/encoder/vm-encoder.js <file> [options]
+    npm run encode -- <file> [options]
+
+  ARGUMENTS
+    <file>              Input file to encode (any format).
+                        If not already gzipped, it will be compressed automatically.
+
+  OPTIONS
+    --mode q4|rgb       Encoding mode (default: q4)
+                          q4  — 4-level quantized, ~9.1 KB/frame. Survives lossy
+                                screen capture (getDisplayMedia, screenshots of video).
+                          rgb — full 24-bit color, ~36.4 KB/frame. Use only with
+                                lossless PNG screenshots.
+    --block N           Pixel block size in px (default: 8). Larger blocks are easier to
+                        capture but reduce throughput.
+    --output FILE       Output HTML file path (default: frames.html)
+    --help, -h          Show this help message
+
+  EXAMPLES
+    # Encode an Allure report archive (Q4 mode, default)
+    node src/encoder/vm-encoder.js dummies/allure-small.tar.gz
+
+    # Same thing via npm script
+    npm run encode -- dummies/allure-small.tar.gz
+
+    # Use RGB mode for lossless screenshot capture
+    node src/encoder/vm-encoder.js report.tar.gz --mode rgb
+
+    # Custom block size and output path
+    node src/encoder/vm-encoder.js data.tar.gz --block 10 --output my-frames.html
+
+  WORKFLOW
+    1. Run the encoder on the file inside the VM -> produces an HTML file
+    2. Open the HTML in a browser inside the VM -> plays animated pixel frames
+    3. On the host machine, open src/decoder/host-decoder.html in a browser
+    4. Click "Start Capture" -> select the VM window -> wait for 100%
+    5. Download the decoded file on the host
+`);
+    process.exit(0);
+}
+
+if (hasFlag('help') || hasFlag('h') || args.includes('-h')) {
+    showHelp();
+}
+
+const inputFile = args.find(a => !a.startsWith('--') && a !== '-h');
 
 if (!inputFile) {
-    console.error('Usage: node vm-encoder-v2.js <file> [options]');
-    console.error('  --mode q4|rgb   encoding mode (default: q4)');
-    console.error('  --block N       block size in px (default: 8)');
-    console.error('  --output FILE   output HTML (default: frames.html)');
+    console.error('Error: no input file specified.\n');
+    console.error('Usage: node src/encoder/vm-encoder.js <file> [--mode q4|rgb] [--output FILE]');
+    console.error('\nRun with --help for full usage information.');
     process.exit(1);
 }
 
@@ -65,6 +119,12 @@ const CANVAS_W = COLS * BLOCK + 2 * BORDER;
 const CANVAS_H = ROWS * BLOCK + 2 * BORDER;
 
 // ── Read & compress input ───────────────────────────────
+if (!fs.existsSync(inputFile)) {
+    console.error('Error: file not found: ' + inputFile);
+    console.error('Check the path and try again.');
+    process.exit(1);
+}
+
 let data = fs.readFileSync(inputFile);
 console.log('Input:  ' + inputFile + ' (' + (data.length / 1048576).toFixed(2) + ' MB)');
 
