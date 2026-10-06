@@ -1,0 +1,3662 @@
+{
+  "testRun": {
+    "id": "run-7aa8a932b34b",
+    "timestamp": "2026-10-06T14:32:11Z",
+    "duration": 78888,
+    "status": "broken",
+    "environment": {
+      "os": "Windows 11 Pro 24H2",
+      "browser": "Chrome 130.0",
+      "resolution": "1920x1080",
+      "ram": "16GB",
+      "cpu": "Intel i7-13700K"
+    }
+  },
+  "suites": [
+    {
+      "name": "Auth Suite",
+      "tests": [
+        {
+          "id": "tc-831000",
+          "name": "test_auth_001",
+          "status": "broken",
+          "duration": 8089,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 270
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3785
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 513
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 468724,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-096005",
+          "name": "test_auth_002",
+          "status": "failed",
+          "duration": 5120,
+          "labels": [
+            "integration",
+            "flaky",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 110
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2678
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 434
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/auth.spec.js:196:34)"
+          }
+        },
+        {
+          "id": "tc-140388",
+          "name": "test_auth_003",
+          "status": "skipped",
+          "duration": 106,
+          "labels": [
+            "unit",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 222
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1089
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1505
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-515058",
+          "name": "test_auth_004",
+          "status": "broken",
+          "duration": 6792,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 29
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 849
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 479
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-966274",
+          "name": "test_auth_005",
+          "status": "failed",
+          "duration": 9241,
+          "labels": [
+            "integration",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 278
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1090
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 323
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/auth.spec.js:120:24)"
+          }
+        },
+        {
+          "id": "tc-089684",
+          "name": "test_auth_006",
+          "status": "passed",
+          "duration": 4491,
+          "labels": [
+            "critical",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 152
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 206
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 771
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 492695,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-313396",
+          "name": "test_auth_007",
+          "status": "broken",
+          "duration": 11292,
+          "labels": [
+            "smoke",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 124
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2772
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1382
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-785162",
+          "name": "test_auth_008",
+          "status": "skipped",
+          "duration": 4308,
+          "labels": [
+            "smoke",
+            "critical",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 67
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 587
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 785
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 70552,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-492174",
+          "name": "test_auth_009",
+          "status": "skipped",
+          "duration": 14755,
+          "labels": [
+            "e2e",
+            "regression",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 187
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1137
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1647
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-472124",
+          "name": "test_auth_010",
+          "status": "passed",
+          "duration": 3706,
+          "labels": [
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 417
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4217
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1529
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 171549,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-788920",
+          "name": "test_auth_011",
+          "status": "failed",
+          "duration": 536,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 369
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1881
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 309
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Expected element to be visible but was hidden",
+            "trace": "at Object.<anonymous> (test/auth.spec.js:127:13)"
+          }
+        },
+        {
+          "id": "tc-839674",
+          "name": "test_auth_012",
+          "status": "skipped",
+          "duration": 985,
+          "labels": [
+            "smoke",
+            "regression",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 367
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3673
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 476
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-552972",
+          "name": "test_auth_013",
+          "status": "broken",
+          "duration": 728,
+          "labels": [
+            "unit",
+            "smoke",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 267
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2387
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1769
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-561004",
+          "name": "test_auth_014",
+          "status": "skipped",
+          "duration": 11370,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 291
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4208
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1832
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 79732,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-522500",
+          "name": "test_auth_015",
+          "status": "passed",
+          "duration": 6348,
+          "labels": [
+            "flaky",
+            "unit",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup auth",
+              "status": "passed",
+              "duration": 441
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4929
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 522
+            }
+          ],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "name": "Dashboard Suite",
+      "tests": [
+        {
+          "id": "tc-202645",
+          "name": "test_dashboard_001",
+          "status": "broken",
+          "duration": 9332,
+          "labels": [
+            "flaky",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 76
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2424
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 899
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-409672",
+          "name": "test_dashboard_002",
+          "status": "passed",
+          "duration": 4647,
+          "labels": [
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 190
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1090
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1032
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 476381,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-702239",
+          "name": "test_dashboard_003",
+          "status": "broken",
+          "duration": 5506,
+          "labels": [
+            "critical",
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 93
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1228
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 480
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 381008,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-438370",
+          "name": "test_dashboard_004",
+          "status": "failed",
+          "duration": 5029,
+          "labels": [
+            "flaky",
+            "regression",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 100
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2547
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 508
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 478229,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "AssertionError: expected 200 but got 500",
+            "trace": "at Object.<anonymous> (test/dashboard.spec.js:131:21)"
+          }
+        },
+        {
+          "id": "tc-780210",
+          "name": "test_dashboard_005",
+          "status": "skipped",
+          "duration": 8101,
+          "labels": [
+            "flaky",
+            "smoke",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 174
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1662
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1631
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-789793",
+          "name": "test_dashboard_006",
+          "status": "passed",
+          "duration": 5451,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 430
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4271
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1618
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 452084,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-001398",
+          "name": "test_dashboard_007",
+          "status": "passed",
+          "duration": 1172,
+          "labels": [
+            "critical",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 129
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2995
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 233
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 174369,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-195653",
+          "name": "test_dashboard_008",
+          "status": "failed",
+          "duration": 10402,
+          "labels": [
+            "e2e",
+            "flaky",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 164
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4977
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1145
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 288429,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/dashboard.spec.js:43:19)"
+          }
+        },
+        {
+          "id": "tc-254939",
+          "name": "test_dashboard_009",
+          "status": "skipped",
+          "duration": 11327,
+          "labels": [
+            "flaky",
+            "e2e",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 349
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4859
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 252
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 325000,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-401047",
+          "name": "test_dashboard_010",
+          "status": "failed",
+          "duration": 2799,
+          "labels": [
+            "critical",
+            "e2e",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 338
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 488
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 773
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/dashboard.spec.js:169:20)"
+          }
+        },
+        {
+          "id": "tc-101612",
+          "name": "test_dashboard_011",
+          "status": "skipped",
+          "duration": 6434,
+          "labels": [
+            "flaky",
+            "smoke",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 271
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 761
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 409
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 224553,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-957412",
+          "name": "test_dashboard_012",
+          "status": "failed",
+          "duration": 9715,
+          "labels": [
+            "integration",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 317
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1536
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1072
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 311838,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/dashboard.spec.js:173:2)"
+          }
+        },
+        {
+          "id": "tc-639225",
+          "name": "test_dashboard_013",
+          "status": "skipped",
+          "duration": 478,
+          "labels": [
+            "smoke",
+            "unit",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 108
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4428
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1388
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-434098",
+          "name": "test_dashboard_014",
+          "status": "passed",
+          "duration": 6098,
+          "labels": [
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup dashboard",
+              "status": "passed",
+              "duration": 345
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3589
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1050
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 143191,
+              "type": "image/png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Payments Suite",
+      "tests": [
+        {
+          "id": "tc-293839",
+          "name": "test_payments_001",
+          "status": "failed",
+          "duration": 1336,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 305
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3444
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1967
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 172414,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "AssertionError: expected 200 but got 500",
+            "trace": "at Object.<anonymous> (test/payments.spec.js:166:24)"
+          }
+        },
+        {
+          "id": "tc-823696",
+          "name": "test_payments_002",
+          "status": "passed",
+          "duration": 7634,
+          "labels": [
+            "regression",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 368
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3391
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1406
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-474776",
+          "name": "test_payments_003",
+          "status": "broken",
+          "duration": 1416,
+          "labels": [
+            "e2e",
+            "smoke",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 110
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1102
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 159
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 245454,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-952752",
+          "name": "test_payments_004",
+          "status": "skipped",
+          "duration": 14114,
+          "labels": [
+            "smoke",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 314
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2585
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 659
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-313561",
+          "name": "test_payments_005",
+          "status": "skipped",
+          "duration": 11431,
+          "labels": [
+            "critical",
+            "smoke",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 256
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1868
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 294
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 236009,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-727826",
+          "name": "test_payments_006",
+          "status": "broken",
+          "duration": 5080,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 11
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3105
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1868
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 393300,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-236118",
+          "name": "test_payments_007",
+          "status": "failed",
+          "duration": 8886,
+          "labels": [
+            "critical",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 310
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1437
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1671
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 497263,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/payments.spec.js:145:8)"
+          }
+        },
+        {
+          "id": "tc-691828",
+          "name": "test_payments_008",
+          "status": "passed",
+          "duration": 8933,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup payments",
+              "status": "passed",
+              "duration": 367
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2493
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 485
+            }
+          ],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "name": "Users Suite",
+      "tests": [
+        {
+          "id": "tc-027845",
+          "name": "test_users_001",
+          "status": "skipped",
+          "duration": 1506,
+          "labels": [
+            "regression",
+            "flaky",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 263
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4815
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 125
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 131615,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-998344",
+          "name": "test_users_002",
+          "status": "failed",
+          "duration": 13025,
+          "labels": [
+            "unit",
+            "regression",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 72
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3733
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 416
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/users.spec.js:13:7)"
+          }
+        },
+        {
+          "id": "tc-676616",
+          "name": "test_users_003",
+          "status": "broken",
+          "duration": 1070,
+          "labels": [
+            "unit",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 196
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3528
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 303
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 488788,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-701950",
+          "name": "test_users_004",
+          "status": "broken",
+          "duration": 11292,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 299
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2115
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 328
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 434358,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-850132",
+          "name": "test_users_005",
+          "status": "failed",
+          "duration": 639,
+          "labels": [
+            "smoke",
+            "critical",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 153
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4040
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 627
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/users.spec.js:127:13)"
+          }
+        },
+        {
+          "id": "tc-359962",
+          "name": "test_users_006",
+          "status": "failed",
+          "duration": 13407,
+          "labels": [
+            "smoke",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 15
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3273
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 801
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/users.spec.js:141:11)"
+          }
+        },
+        {
+          "id": "tc-666933",
+          "name": "test_users_007",
+          "status": "passed",
+          "duration": 6005,
+          "labels": [
+            "e2e",
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 133
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 267
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 519
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-618907",
+          "name": "test_users_008",
+          "status": "failed",
+          "duration": 6215,
+          "labels": [
+            "regression",
+            "e2e",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 67
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 791
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1572
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "AssertionError: expected 200 but got 500",
+            "trace": "at Object.<anonymous> (test/users.spec.js:19:6)"
+          }
+        },
+        {
+          "id": "tc-024477",
+          "name": "test_users_009",
+          "status": "skipped",
+          "duration": 12298,
+          "labels": [
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 129
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4227
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 10
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-039555",
+          "name": "test_users_010",
+          "status": "skipped",
+          "duration": 5903,
+          "labels": [
+            "unit",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup users",
+              "status": "passed",
+              "duration": 143
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 125
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1977
+            }
+          ],
+          "attachments": []
+        }
+      ]
+    },
+    {
+      "name": "Reports Suite",
+      "tests": [
+        {
+          "id": "tc-183824",
+          "name": "test_reports_001",
+          "status": "passed",
+          "duration": 10887,
+          "labels": [
+            "flaky",
+            "critical",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 269
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2835
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1665
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 355938,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-689286",
+          "name": "test_reports_002",
+          "status": "failed",
+          "duration": 7103,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 232
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4488
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 74
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "AssertionError: expected 200 but got 500",
+            "trace": "at Object.<anonymous> (test/reports.spec.js:20:14)"
+          }
+        },
+        {
+          "id": "tc-567716",
+          "name": "test_reports_003",
+          "status": "broken",
+          "duration": 14413,
+          "labels": [
+            "smoke",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 390
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2685
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 943
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 430516,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-458432",
+          "name": "test_reports_004",
+          "status": "broken",
+          "duration": 860,
+          "labels": [
+            "smoke",
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 460
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3517
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 310
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 73372,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-961756",
+          "name": "test_reports_005",
+          "status": "broken",
+          "duration": 14841,
+          "labels": [
+            "e2e",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 202
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 414
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1787
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 206282,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-808492",
+          "name": "test_reports_006",
+          "status": "passed",
+          "duration": 14881,
+          "labels": [
+            "critical",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 401
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1683
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 409
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-084988",
+          "name": "test_reports_007",
+          "status": "failed",
+          "duration": 7455,
+          "labels": [
+            "smoke",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 357
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1680
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 132
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 131701,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/reports.spec.js:199:17)"
+          }
+        },
+        {
+          "id": "tc-914494",
+          "name": "test_reports_008",
+          "status": "broken",
+          "duration": 2255,
+          "labels": [
+            "flaky",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 121
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1944
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1391
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 174702,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-136116",
+          "name": "test_reports_009",
+          "status": "broken",
+          "duration": 2842,
+          "labels": [
+            "e2e",
+            "regression",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 73
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3207
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1489
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-279621",
+          "name": "test_reports_010",
+          "status": "skipped",
+          "duration": 4773,
+          "labels": [
+            "critical",
+            "regression",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 288
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 229
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 788
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 286779,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-733742",
+          "name": "test_reports_011",
+          "status": "passed",
+          "duration": 13859,
+          "labels": [
+            "unit",
+            "critical",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 361
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1118
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1076
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 338641,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-088783",
+          "name": "test_reports_012",
+          "status": "skipped",
+          "duration": 6585,
+          "labels": [
+            "integration",
+            "flaky",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 191
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4981
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1006
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 195698,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-072072",
+          "name": "test_reports_013",
+          "status": "broken",
+          "duration": 1073,
+          "labels": [
+            "integration",
+            "smoke",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup reports",
+              "status": "passed",
+              "duration": 176
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4781
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1717
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 253186,
+              "type": "image/png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Settings Suite",
+      "tests": [
+        {
+          "id": "tc-190320",
+          "name": "test_settings_001",
+          "status": "passed",
+          "duration": 7961,
+          "labels": [
+            "unit",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup settings",
+              "status": "passed",
+              "duration": 129
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 923
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1606
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-410173",
+          "name": "test_settings_002",
+          "status": "broken",
+          "duration": 9160,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup settings",
+              "status": "passed",
+              "duration": 295
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3425
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 354
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-079243",
+          "name": "test_settings_003",
+          "status": "passed",
+          "duration": 4933,
+          "labels": [
+            "integration",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup settings",
+              "status": "passed",
+              "duration": 340
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 616
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1391
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-291427",
+          "name": "test_settings_004",
+          "status": "broken",
+          "duration": 13236,
+          "labels": [
+            "smoke",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup settings",
+              "status": "passed",
+              "duration": 181
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 653
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1321
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 62582,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-268953",
+          "name": "test_settings_005",
+          "status": "skipped",
+          "duration": 8534,
+          "labels": [
+            "critical",
+            "e2e",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup settings",
+              "status": "passed",
+              "duration": 435
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4968
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 570
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 158400,
+              "type": "image/png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "API Suite",
+      "tests": [
+        {
+          "id": "tc-779209",
+          "name": "test_api_001",
+          "status": "passed",
+          "duration": 10895,
+          "labels": [
+            "e2e",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 91
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1107
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 679
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 283760,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-505291",
+          "name": "test_api_002",
+          "status": "broken",
+          "duration": 11484,
+          "labels": [
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 475
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3530
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 895
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 139316,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-606948",
+          "name": "test_api_003",
+          "status": "broken",
+          "duration": 1255,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 243
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4126
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 900
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-271883",
+          "name": "test_api_004",
+          "status": "failed",
+          "duration": 8940,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 496
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1992
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1777
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/api.spec.js:84:3)"
+          }
+        },
+        {
+          "id": "tc-805882",
+          "name": "test_api_005",
+          "status": "passed",
+          "duration": 653,
+          "labels": [
+            "flaky",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 388
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1214
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 211
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-070916",
+          "name": "test_api_006",
+          "status": "failed",
+          "duration": 14612,
+          "labels": [
+            "smoke",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 475
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3925
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 115
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/api.spec.js:39:21)"
+          }
+        },
+        {
+          "id": "tc-804393",
+          "name": "test_api_007",
+          "status": "passed",
+          "duration": 12715,
+          "labels": [
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 133
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 509
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 192
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 437131,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-133699",
+          "name": "test_api_008",
+          "status": "broken",
+          "duration": 3643,
+          "labels": [
+            "integration",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 219
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2162
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 568
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-445810",
+          "name": "test_api_009",
+          "status": "broken",
+          "duration": 11768,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 194
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4317
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 782
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 236376,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-545586",
+          "name": "test_api_010",
+          "status": "skipped",
+          "duration": 4378,
+          "labels": [
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 386
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 965
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1951
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-515588",
+          "name": "test_api_011",
+          "status": "failed",
+          "duration": 954,
+          "labels": [
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 422
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 128
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1012
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 216071,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Expected element to be visible but was hidden",
+            "trace": "at Object.<anonymous> (test/api.spec.js:166:35)"
+          }
+        },
+        {
+          "id": "tc-562336",
+          "name": "test_api_012",
+          "status": "broken",
+          "duration": 5348,
+          "labels": [
+            "smoke",
+            "unit",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 40
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1985
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1099
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 128375,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-968130",
+          "name": "test_api_013",
+          "status": "failed",
+          "duration": 7286,
+          "labels": [
+            "regression",
+            "unit",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup api",
+              "status": "passed",
+              "duration": 38
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4683
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1754
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/api.spec.js:194:37)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search Suite",
+      "tests": [
+        {
+          "id": "tc-991930",
+          "name": "test_search_001",
+          "status": "broken",
+          "duration": 2095,
+          "labels": [
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 150
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2458
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1891
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 199489,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-316577",
+          "name": "test_search_002",
+          "status": "broken",
+          "duration": 8784,
+          "labels": [
+            "smoke",
+            "e2e",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 385
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3972
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 101
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 397093,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-740541",
+          "name": "test_search_003",
+          "status": "failed",
+          "duration": 12108,
+          "labels": [
+            "flaky",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 215
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3739
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 883
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 184225,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Network request failed: ERR_CONNECTION_REFUSED",
+            "trace": "at Object.<anonymous> (test/search.spec.js:59:40)"
+          }
+        },
+        {
+          "id": "tc-059839",
+          "name": "test_search_004",
+          "status": "skipped",
+          "duration": 5369,
+          "labels": [
+            "regression",
+            "critical"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 288
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1977
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 530
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-969607",
+          "name": "test_search_005",
+          "status": "failed",
+          "duration": 10155,
+          "labels": [
+            "flaky",
+            "integration",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 413
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4842
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1890
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/search.spec.js:30:4)"
+          }
+        },
+        {
+          "id": "tc-389238",
+          "name": "test_search_006",
+          "status": "passed",
+          "duration": 10908,
+          "labels": [
+            "smoke",
+            "e2e",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 39
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2142
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 817
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 59369,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-198048",
+          "name": "test_search_007",
+          "status": "broken",
+          "duration": 2693,
+          "labels": [
+            "smoke",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 235
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1581
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1186
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-756765",
+          "name": "test_search_008",
+          "status": "broken",
+          "duration": 6845,
+          "labels": [
+            "critical",
+            "e2e",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 389
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4362
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 27
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-801598",
+          "name": "test_search_009",
+          "status": "failed",
+          "duration": 893,
+          "labels": [
+            "regression",
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 296
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3566
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1064
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 244571,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "AssertionError: expected 200 but got 500",
+            "trace": "at Object.<anonymous> (test/search.spec.js:137:5)"
+          }
+        },
+        {
+          "id": "tc-170098",
+          "name": "test_search_010",
+          "status": "failed",
+          "duration": 11253,
+          "labels": [
+            "regression",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 167
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4053
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1797
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 186216,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Element not interactable",
+            "trace": "at Object.<anonymous> (test/search.spec.js:29:4)"
+          }
+        },
+        {
+          "id": "tc-741012",
+          "name": "test_search_011",
+          "status": "passed",
+          "duration": 6042,
+          "labels": [
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 405
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2234
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 906
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-311828",
+          "name": "test_search_012",
+          "status": "broken",
+          "duration": 6627,
+          "labels": [
+            "critical",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup search",
+              "status": "passed",
+              "duration": 152
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3872
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1803
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 369821,
+              "type": "image/png"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Notifications Suite",
+      "tests": [
+        {
+          "id": "tc-665734",
+          "name": "test_notifications_001",
+          "status": "broken",
+          "duration": 9829,
+          "labels": [
+            "smoke",
+            "unit",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 354
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3329
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 694
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 444814,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-299841",
+          "name": "test_notifications_002",
+          "status": "failed",
+          "duration": 13024,
+          "labels": [
+            "e2e",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 256
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 451
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 873
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 432045,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/notifications.spec.js:26:9)"
+          }
+        },
+        {
+          "id": "tc-499794",
+          "name": "test_notifications_003",
+          "status": "failed",
+          "duration": 387,
+          "labels": [
+            "unit",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 107
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 828
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1761
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Timeout waiting for selector #submit-btn",
+            "trace": "at Object.<anonymous> (test/notifications.spec.js:100:10)"
+          }
+        },
+        {
+          "id": "tc-436284",
+          "name": "test_notifications_004",
+          "status": "failed",
+          "duration": 715,
+          "labels": [
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 62
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4689
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 571
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 396657,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Expected element to be visible but was hidden",
+            "trace": "at Object.<anonymous> (test/notifications.spec.js:142:8)"
+          }
+        },
+        {
+          "id": "tc-583151",
+          "name": "test_notifications_005",
+          "status": "skipped",
+          "duration": 8102,
+          "labels": [
+            "regression",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 380
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1662
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1136
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-619662",
+          "name": "test_notifications_006",
+          "status": "passed",
+          "duration": 5743,
+          "labels": [
+            "smoke",
+            "critical",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 342
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4847
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1163
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-044719",
+          "name": "test_notifications_007",
+          "status": "broken",
+          "duration": 13653,
+          "labels": [
+            "regression",
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 195
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3868
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1292
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 228048,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-434408",
+          "name": "test_notifications_008",
+          "status": "failed",
+          "duration": 12960,
+          "labels": [
+            "smoke",
+            "critical",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup notifications",
+              "status": "passed",
+              "duration": 435
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4009
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 236
+            }
+          ],
+          "attachments": [],
+          "error": {
+            "message": "Element not interactable",
+            "trace": "at Object.<anonymous> (test/notifications.spec.js:192:15)"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Export Suite",
+      "tests": [
+        {
+          "id": "tc-668260",
+          "name": "test_export_001",
+          "status": "broken",
+          "duration": 14724,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 457
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4693
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1234
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 216153,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-615725",
+          "name": "test_export_002",
+          "status": "skipped",
+          "duration": 8181,
+          "labels": [
+            "critical",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 259
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4418
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 384
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-850129",
+          "name": "test_export_003",
+          "status": "broken",
+          "duration": 10465,
+          "labels": [
+            "regression",
+            "unit",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 440
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2261
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 153
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-902067",
+          "name": "test_export_004",
+          "status": "skipped",
+          "duration": 10380,
+          "labels": [
+            "critical",
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 463
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 777
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 176
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 241402,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-121726",
+          "name": "test_export_005",
+          "status": "passed",
+          "duration": 1128,
+          "labels": [
+            "e2e",
+            "unit"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 135
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2595
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 979
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-766246",
+          "name": "test_export_006",
+          "status": "skipped",
+          "duration": 1727,
+          "labels": [
+            "unit",
+            "flaky",
+            "integration"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 92
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1534
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1090
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 413544,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-508573",
+          "name": "test_export_007",
+          "status": "skipped",
+          "duration": 6402,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 391
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 127
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 526
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 139154,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-249086",
+          "name": "test_export_008",
+          "status": "skipped",
+          "duration": 5406,
+          "labels": [
+            "unit",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 218
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 2975
+            },
+            {
+              "name": "Verify result",
+              "status": "skipped",
+              "duration": 1103
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 460059,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-715450",
+          "name": "test_export_009",
+          "status": "passed",
+          "duration": 1489,
+          "labels": [
+            "regression",
+            "integration",
+            "e2e"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 323
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 4262
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 1953
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-295977",
+          "name": "test_export_010",
+          "status": "failed",
+          "duration": 10390,
+          "labels": [
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 456
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3806
+            },
+            {
+              "name": "Verify result",
+              "status": "passed",
+              "duration": 1863
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 213180,
+              "type": "image/png"
+            }
+          ],
+          "error": {
+            "message": "Element not interactable",
+            "trace": "at Object.<anonymous> (test/export.spec.js:32:34)"
+          }
+        },
+        {
+          "id": "tc-933771",
+          "name": "test_export_011",
+          "status": "passed",
+          "duration": 9964,
+          "labels": [
+            "regression",
+            "integration",
+            "flaky"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 412
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 1341
+            },
+            {
+              "name": "Verify result",
+              "status": "broken",
+              "duration": 873
+            }
+          ],
+          "attachments": []
+        },
+        {
+          "id": "tc-878879",
+          "name": "test_export_012",
+          "status": "passed",
+          "duration": 7722,
+          "labels": [
+            "smoke"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 102
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 524
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1652
+            }
+          ],
+          "attachments": [
+            {
+              "name": "screenshot.png",
+              "size": 295184,
+              "type": "image/png"
+            }
+          ]
+        },
+        {
+          "id": "tc-549125",
+          "name": "test_export_013",
+          "status": "skipped",
+          "duration": 6417,
+          "labels": [
+            "regression"
+          ],
+          "steps": [
+            {
+              "name": "Setup export",
+              "status": "passed",
+              "duration": 29
+            },
+            {
+              "name": "Execute action",
+              "status": "passed",
+              "duration": 3741
+            },
+            {
+              "name": "Verify result",
+              "status": "failed",
+              "duration": 1245
+            }
+          ],
+          "attachments": []
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total": 111,
+    "passed": 25,
+    "failed": 28,
+    "broken": 32,
+    "skipped": 26
+  }
+}

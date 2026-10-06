@@ -158,6 +158,9 @@ let statOk = 0, statFail = 0, statMiss = 0, statDupe = 0, statTotal = 0;
 let captureStream = null;
 let captureTimer = null;
 let captureRate = 200;
+let captureActive = false;
+let staleGrabs = 0;
+let prevHeaderSig = null;
 let captureVideo = null;
 let grabCanvas = null;
 let grabCtx = null;
@@ -585,17 +588,6 @@ async function startCapture() {
 
     await captureVideo.play();
 
-    // Wait a moment for video to stabilize
-    await new Promise(r => setTimeout(r, 500));
-
-    // Setup grab canvas
-    grabCanvas = document.createElement('canvas');
-    grabCanvas.width = captureVideo.videoWidth;
-    grabCanvas.height = captureVideo.videoHeight;
-    grabCtx = grabCanvas.getContext('2d', { willReadFrequently: true });
-
-    log('🎥 Capture started: ' + grabCanvas.width + '×' + grabCanvas.height + ' @ ' + captureRate + 'ms', 'ok');
-
     document.getElementById('btn-start').disabled = true;
     document.getElementById('btn-stop').disabled = false;
 
@@ -604,32 +596,113 @@ async function startCapture() {
         stopCapture();
     });
 
+    // Wait for video dimensions to stabilize.
+    // getDisplayMedia often reports preliminary dimensions first, then fires
+    // a 'resize' event when the real capture resolution locks in.
+    // We wait for either a resize event or a timeout, then an extra settle pause.
+    log('⏳ Waiting for video dimensions to stabilize…', 'dbg');
+
+    await new Promise(resolve => {
+        let resolved = false;
+        const done = () => { if (!resolved) { resolved = true; resolve(); } };
+
+        // resize fires when the video track settles to real dimensions
+        captureVideo.addEventListener('resize', () => {
+            // Give an extra moment for the frame at the new size to render
+            setTimeout(done, 300);
+        }, { once: true });
+
+        // Fallback: if no resize fires within 3s, dimensions are already correct
+        setTimeout(done, 3000);
+    });
+
+    // Setup grab canvas with the now-stable dimensions
+    grabCanvas = document.createElement('canvas');
+    grabCanvas.width = captureVideo.videoWidth;
+    grabCanvas.height = captureVideo.videoHeight;
+    grabCtx = grabCanvas.getContext('2d', { willReadFrequently: true });
+
+    // Listen for any further resize events (user resizes the captured window)
+    captureVideo.addEventListener('resize', () => {
+        if (captureVideo.videoWidth > 0 && captureVideo.videoHeight > 0) {
+            grabCanvas.width = captureVideo.videoWidth;
+            grabCanvas.height = captureVideo.videoHeight;
+            log('📐 Video resized: ' + grabCanvas.width + '×' + grabCanvas.height, 'dbg');
+            cachedScale = null;
+            cachedOrigin = null;
+        }
+    });
+
+    log('🎥 Capture started: ' + grabCanvas.width + '×' + grabCanvas.height + ' @ ' + captureRate + 'ms', 'ok');
+
     // Start frame grabbing
-    captureTimer = setInterval(grabFrame, captureRate);
+    captureActive = true;
+    if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+        log('Using requestVideoFrameCallback (frame-precise capture)', 'dbg');
+        scheduleVideoFrameGrab();
+    } else {
+        log('Fallback: setTimeout polling (no rVFC support)', 'dbg');
+        scheduleGrab();
+    }
+}
+
+function headerSignature(imgData) {
+    const d = imgData.data;
+    const stride = imgData.width * 4;
+    let sig = 0;
+    const step = Math.max(4, Math.floor(imgData.width / 50)) * 4;
+    for (let row = 0; row < 2 && row * stride < d.length; row++) {
+        for (let x = 0; x < stride; x += step) {
+            const i = row * stride + x;
+            sig = (sig * 31 + d[i]) | 0;
+        }
+    }
+    return sig;
+}
+
+function scheduleVideoFrameGrab() {
+    if (!captureActive) return;
+    captureVideo.requestVideoFrameCallback(function(now, metadata) {
+        if (!captureActive) return;
+        grabFrame();
+        scheduleVideoFrameGrab();
+    });
+}
+
+function scheduleGrab() {
+    if (!captureActive) return;
+    const jitter = captureRate * (0.8 + Math.random() * 0.4);
+    captureTimer = setTimeout(function() {
+        if (!captureActive) return;
+        grabFrame();
+        scheduleGrab();
+    }, jitter);
 }
 
 function grabFrame() {
-    if (!captureVideo || captureVideo.readyState < 2) return;
-
-    // Resize canvas if video dimensions changed
-    if (grabCanvas.width !== captureVideo.videoWidth || grabCanvas.height !== captureVideo.videoHeight) {
-        grabCanvas.width = captureVideo.videoWidth;
-        grabCanvas.height = captureVideo.videoHeight;
-        log('📐 Video resized: ' + grabCanvas.width + '×' + grabCanvas.height, 'dbg');
-        cachedScale = null;
-        cachedOrigin = null;
-    }
-
-    grabCtx.drawImage(captureVideo, 0, 0);
-    const imgData = grabCtx.getImageData(0, 0, grabCanvas.width, grabCanvas.height);
     statTotal++;
+    try {
+        grabCtx.drawImage(captureVideo, 0, 0, grabCanvas.width, grabCanvas.height);
+        const imgData = grabCtx.getImageData(0, 0, grabCanvas.width, grabCanvas.height);
 
-    const result = decodeFrame(imgData, 'capture-' + statTotal, false);
-    collectFrame(result, 'capture-' + statTotal);
+        const decoded = decodeFrame(imgData, 'capture', false);
+        collectFrame(decoded, 'capture');
+        if (!decoded) {
+            staleGrabs++;
+        } else if (decoded.crcOk && !frames[decoded.frameIdx]) {
+            staleGrabs = 0; // new frame
+        } else {
+            staleGrabs++; // dupe or CRC fail
+        }
+    } catch (e) {
+        staleGrabs++;
+        updateProgress();
+    }
 }
 
 function stopCapture() {
-    if (captureTimer) { clearInterval(captureTimer); captureTimer = null; }
+    captureActive = false;
+    if (captureTimer) { clearTimeout(captureTimer); captureTimer = null; }
     if (captureStream) {
         captureStream.getTracks().forEach(t => t.stop());
         captureStream = null;
@@ -647,7 +720,14 @@ function setRate(ms) {
     if (el) el.classList.add('active');
     if (captureTimer) {
         clearInterval(captureTimer);
-        captureTimer = setInterval(grabFrame, captureRate);
+        captureActive = true;
+    if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
+        log('Using requestVideoFrameCallback (frame-precise capture)', 'dbg');
+        scheduleVideoFrameGrab();
+    } else {
+        log('Fallback: setTimeout polling (no rVFC support)', 'dbg');
+        scheduleGrab();
+    }
     }
     log('Capture rate: ' + ms + 'ms', 'dbg');
 }
@@ -711,17 +791,76 @@ function download() {
     const out = new Uint8Array(total);
     let off = 0;
     for (const p of parts) { out.set(p, off); off += p.length; }
+    const sizeStr = (total / 1048576).toFixed(2) + ' MB';
 
-    const blob = new Blob([out], { type: 'application/gzip' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = 'decoded.tar.gz';
-    a.click();
-    log('💾 Downloaded: decoded.tar.gz (' + (total / 1048576).toFixed(2) + ' MB)', 'ok');
+    function doDownload(blob, filename) {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = filename;
+        a.click();
+        log('💾 Downloaded: ' + filename + ' (' + sizeStr + ')', 'ok');
+    }
+
+    // Decompress gzip and detect actual content type
+    try {
+        const ds = new DecompressionStream('gzip');
+        const reader = new Blob([out]).stream().pipeThrough(ds).getReader();
+        const chunks = [];
+        (function pump() {
+            reader.read().then(function(result) {
+                if (result.done) {
+                    let rawLen = 0;
+                    for (const c of chunks) rawLen += c.length;
+                    const raw = new Uint8Array(rawLen);
+                    let ro = 0;
+                    for (const c of chunks) { raw.set(c, ro); ro += c.length; }
+
+                    // Detect content type
+                    const magic257 = raw.length > 262 ?
+                        String.fromCharCode(raw[257], raw[258], raw[259], raw[260], raw[261]) : '';
+                    const head = raw.length > 4 ?
+                        String.fromCharCode(raw[0], raw[1], raw[2], raw[3], raw[4]) : '';
+                    const headTrim = head.trim();
+
+                    if (magic257 === 'ustar') {
+                        doDownload(new Blob([out], { type: 'application/gzip' }), 'decoded.tar.gz');
+                    } else if (headTrim.startsWith('{') || headTrim.startsWith('[')) {
+                        doDownload(new Blob([raw], { type: 'application/json' }), 'decoded.json');
+                    } else if (headTrim.startsWith('<')) {
+                        var ext = headTrim.toLowerCase().startsWith('<!doctype html') ||
+                                  headTrim.toLowerCase().startsWith('<html') ? 'html' : 'xml';
+                        doDownload(new Blob([raw], { type: 'text/' + ext }), 'decoded.' + ext);
+                    } else if (raw[0] === 0x50 && raw[1] === 0x4B) {
+                        doDownload(new Blob([raw], { type: 'application/zip' }), 'decoded.zip');
+                    } else if (head.startsWith('%PDF')) {
+                        doDownload(new Blob([raw], { type: 'application/pdf' }), 'decoded.pdf');
+                    } else {
+                        var isText = true;
+                        var check = Math.min(raw.length, 8192);
+                        for (var ti = 0; ti < check; ti++) {
+                            if (raw[ti] === 0) { isText = false; break; }
+                        }
+                        if (isText) {
+                            doDownload(new Blob([raw], { type: 'text/plain' }), 'decoded.txt');
+                        } else {
+                            doDownload(new Blob([raw], { type: 'application/octet-stream' }), 'decoded.bin');
+                        }
+                    }
+                    return;
+                }
+                chunks.push(result.value);
+                pump();
+            }).catch(function() {
+                doDownload(new Blob([out], { type: 'application/octet-stream' }), 'decoded.bin');
+            });
+        })();
+    } catch (e) {
+        doDownload(new Blob([out], { type: 'application/gzip' }), 'decoded.tar.gz');
+    }
 }
 
 function reset_() {
-    frames = {}; totalFrames = null; detectedMode = null;
+    frames = {}; totalFrames = null; detectedMode = null; staleGrabs = 0; prevHeaderSig = null;
     cachedScale = null; cachedOrigin = null;
     statOk = statFail = statMiss = statDupe = statTotal = 0;
     logEl.textContent = '';

@@ -19,6 +19,7 @@
  */
 
 const fs = require('fs');
+const path = require('path');
 const zlib = require('zlib');
 
 // ── Parse args ──────────────────────────────────────────
@@ -48,7 +49,9 @@ function showHelp() {
                                 lossless PNG screenshots.
     --block N           Pixel block size in px (default: 8). Larger blocks are easier to
                         capture but reduce throughput.
-    --output FILE       Output HTML file path (default: frames.html)
+    --delay N           Frame display interval in ms (default: 300). Lower = faster
+                        transfer, but decoder must keep up. Min 50ms.
+    --output FILE       Output HTML file path (default: tmp/frames.html)
     --help, -h          Show this help message
 
   EXAMPLES
@@ -94,7 +97,8 @@ function getArg(name, def) {
 
 const MODE   = getArg('mode', 'q4');
 const BLOCK  = parseInt(getArg('block', '8'));
-const OUTPUT = getArg('output', 'frames.html');
+const DELAY  = Math.max(50, parseInt(getArg('delay', '300')));
+const OUTPUT = getArg('output', 'tmp/frames.html');
 
 if (MODE !== 'q4' && MODE !== 'rgb') {
     console.error('Invalid mode "' + MODE + '". Use q4 or rgb.');
@@ -125,8 +129,60 @@ if (!fs.existsSync(inputFile)) {
     process.exit(1);
 }
 
-let data = fs.readFileSync(inputFile);
-console.log('Input:  ' + inputFile + ' (' + (data.length / 1048576).toFixed(2) + ' MB)');
+let data;
+if (fs.statSync(inputFile).isDirectory()) {
+    // Directory — pack as tar (pure JS, no external deps)
+    console.log('Input is a directory, packing as tar...');
+    const tarBufs = [];
+
+    function tarHeader(name, size) {
+        const buf = Buffer.alloc(512); // all zeros
+        buf.write(name, 0, Math.min(name.length, 100));
+        buf.write('0100644', 100, 7);                                // mode
+        buf.write('0001750', 108, 7);                                // uid
+        buf.write('0001750', 116, 7);                                // gid
+        buf.write(size.toString(8).padStart(11, '0'), 124, 11);     // size
+        const mtime = Math.floor(Date.now() / 1000).toString(8).padStart(11, '0');
+        buf.write(mtime, 136, 11);                                   // mtime
+        buf.fill(0x20, 148, 156);                                    // checksum placeholder = spaces
+        buf[156] = 0x30;                                             // typeflag '0' = regular file
+        buf.write('ustar', 257, 5);                                  // magic (null already at 262)
+        buf.write('00', 263, 2);                                     // version
+        // compute checksum
+        let cksum = 0;
+        for (let i = 0; i < 512; i++) cksum += buf[i];
+        const cs = cksum.toString(8).padStart(6, '0');
+        buf.write(cs, 148, 6);
+        buf[154] = 0;                                                // null terminator
+        buf[155] = 0x20;                                             // trailing space
+        return buf;
+    }
+    function walkDir(dir, prefix) {
+        const entries = fs.readdirSync(dir).sort();
+        for (const e of entries) {
+            const full = path.join(dir, e);
+            const rel = prefix ? prefix + '/' + e : e;
+            const st = fs.statSync(full);
+            if (st.isDirectory()) {
+                walkDir(full, rel);
+            } else if (st.isFile()) {
+                const fileData = fs.readFileSync(full);
+                tarBufs.push(tarHeader(rel, fileData.length));
+                tarBufs.push(fileData);
+                const pad = (512 - (fileData.length % 512)) % 512;
+                if (pad > 0) tarBufs.push(Buffer.alloc(pad));
+            }
+        }
+    }
+
+    walkDir(path.resolve(inputFile), path.basename(inputFile));
+    tarBufs.push(Buffer.alloc(1024)); // end-of-archive marker
+    data = Buffer.concat(tarBufs);
+    console.log('Input:  ' + inputFile + '/ -> tar (' + (data.length / 1048576).toFixed(2) + ' MB)');
+} else {
+    data = fs.readFileSync(inputFile);
+    console.log('Input:  ' + inputFile + ' (' + (data.length / 1048576).toFixed(2) + ' MB)');
+}
 
 if (data[0] !== 0x1f || data[1] !== 0x8b) {
     console.log('Compressing with gzip -9…');
@@ -140,8 +196,9 @@ console.log('Grid:   ' + COLS + '×' + ROWS + ' cells, block=' + BLOCK + 'px, ca
 console.log('Payload per frame: ' + (BYTES_PER_FRAME / 1024).toFixed(1) + ' KB (' + CELLS_PER_FRAME + ' data cells)');
 console.log('Frames: ' + totalFrames);
 
-const estMinutes = (totalFrames * 0.5 / 60).toFixed(1);
-console.log('Est. capture time at 500ms/frame: ~' + estMinutes + ' min');
+const estMinutes = (totalFrames * DELAY / 1000 / 60).toFixed(1);
+console.log('Delay:  ' + DELAY + 'ms/frame');
+console.log('Est. capture time: ~' + estMinutes + ' min (' + totalFrames + ' frames × ' + DELAY + 'ms)');
 
 // ── Feasibility check ───────────────────────────────────
 const b64 = data.toString('base64');
@@ -193,11 +250,12 @@ kbd{background:#222;padding:1px 5px;border-radius:2px;border:1px solid #444;font
   <button onclick="next()">▶</button>
   <button onclick="toggleLoop()" id="bl">🔁 Loop</button>
   <span style="margin-left:12px">ms/frame:</span>
+  <button onclick="spd(50)">50</button>
+  <button onclick="spd(100)">100</button>
   <button onclick="spd(200)">200</button>
-  <button onclick="spd(300)">300</button>
-  <button onclick="spd(500)" class="active" id="s500">500</button>
+  <button onclick="spd(300)" id="s300">300</button>
+  <button onclick="spd(500)" id="s500">500</button>
   <button onclick="spd(1000)">1000</button>
-  <button onclick="spd(2000)">2000</button>
 </div>
 <div id="hint"><kbd>←</kbd> prev  <kbd>→</kbd> next  <kbd>Space</kbd> play/pause  <kbd>L</kbd> loop  <kbd>Home</kbd> first  <kbd>End</kbd> last</div>
 
@@ -215,14 +273,19 @@ function b2u(s){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.lengt
 const data=b2u(B64);
 const TF=Math.ceil(data.length/BPF);
 
-let cur=0,playing=false,looping=true,timer=null,speed=500;
+let cur=0,playing=false,looping=true,timer=null,speed=${DELAY};
 const cv=document.getElementById('c'),cx=cv.getContext('2d'),info=document.getElementById('info');
+
+// ── Offscreen double buffer (avoids tearing during frame transitions) ──
+const offCv=document.createElement('canvas');
+offCv.width=cv.width;offCv.height=cv.height;
+const off=offCv.getContext('2d');
 
 // ── CRC-32 ──
 function crc32(buf){let c=0xFFFFFFFF;for(let i=0;i<buf.length;i++){c^=buf[i];for(let j=0;j<8;j++)c=(c>>>1)^(c&1?0xEDB88320:0)}return(c^0xFFFFFFFF)>>>0}
 
 // ── Draw helpers ──
-function cell(c,r,R,G,B){cx.fillStyle='rgb('+R+','+G+','+B+')';cx.fillRect(BDR+c*BLK,BDR+r*BLK,BLK,BLK)}
+function cell(c,r,R,G,B){off.fillStyle='rgb('+R+','+G+','+B+')';off.fillRect(BDR+c*BLK,BDR+r*BLK,BLK,BLK)}
 
 // Q4: encode 6-bit value as RGB (2 bits per channel, levels 0,85,170,255)
 function q4cell(c,r,val){
@@ -231,18 +294,18 @@ function q4cell(c,r,val){
 
 // ── Draw one frame ──
 function draw(idx){
-  cx.fillStyle='#000';cx.fillRect(0,0,cv.width,cv.height);
+  off.fillStyle='#000';off.fillRect(0,0,offCv.width,offCv.height);
 
   // Sync border (alternating black / magenta cells)
   for(let i=0;i<COLS+2;i++){
-    cx.fillStyle=i%2?'#f0f':'#000';
-    cx.fillRect(i*BLK,0,BLK,BDR);
-    cx.fillRect(i*BLK,BDR+ROWS*BLK,BLK,BDR);
+    off.fillStyle=i%2?'#f0f':'#000';
+    off.fillRect(i*BLK,0,BLK,BDR);
+    off.fillRect(i*BLK,BDR+ROWS*BLK,BLK,BDR);
   }
   for(let j=0;j<ROWS;j++){
-    cx.fillStyle=j%2?'#f0f':'#000';
-    cx.fillRect(0,BDR+j*BLK,BDR,BLK);
-    cx.fillRect(BDR+COLS*BLK,BDR+j*BLK,BDR,BLK);
+    off.fillStyle=j%2?'#f0f':'#000';
+    off.fillRect(0,BDR+j*BLK,BDR,BLK);
+    off.fillRect(BDR+COLS*BLK,BDR+j*BLK,BDR,BLK);
   }
 
   // Frame payload slice
@@ -327,31 +390,43 @@ function draw(idx){
   }
 
   info.textContent='Frame '+(idx+1)+'/'+TF+'  |  '+dl+' B  |  CRC 0x'+chk.toString(16).toUpperCase().padStart(8,'0')+'  |  '+(MODE?'Q4':'RGB')+'  |  Total '+(data.length/1048576).toFixed(2)+' MB';
+
+  // Atomic blit: copy completed frame to visible canvas in one operation
+  cx.drawImage(offCv,0,0);
 }
 
-// ── Controls ──
-function next(){
+// ── Controls (rAF-synced playback) ──
+// rAF-synced: each frame survives at least one vsync before next swap.
+let rafId=null, lastFrameTime=0;
+
+function advance(){
   if(cur>=TF-1){
-    if(looping){cur=0;draw(0)}
-    return;
-  }
-  cur++;draw(cur);
+    if(looping){cur=0} else {togglePlay();return}
+  } else {cur++}
+  draw(cur);
 }
+
+function next(){advance()}
 function prev(){cur=Math.max(cur-1,0);draw(cur)}
+
+function playLoop(ts){
+  if(!playing) return;
+  if(ts-lastFrameTime>=speed){
+    advance();
+    lastFrameTime=ts;
+  }
+  rafId=requestAnimationFrame(playLoop);
+}
 
 function togglePlay(){
   playing=!playing;
   document.getElementById('bp').textContent=playing?'⏸ Pause':'▶ Play';
   if(playing){
-    timer=setInterval(()=>{
-      if(cur>=TF-1){
-        if(looping){cur=0;draw(0)}
-        else{togglePlay()}
-        return;
-      }
-      next();
-    },speed);
-  } else clearInterval(timer);
+    lastFrameTime=performance.now();
+    rafId=requestAnimationFrame(playLoop);
+  } else {
+    if(rafId){cancelAnimationFrame(rafId);rafId=null}
+  }
 }
 
 function toggleLoop(){
@@ -363,10 +438,11 @@ function toggleLoop(){
 
 function spd(ms){
   speed=ms;
-  document.querySelectorAll('#ctrl button').forEach(b=>b.classList.remove('active'));
-  const b=document.getElementById('s'+ms);if(b)b.classList.add('active');
-  if(playing){clearInterval(timer);timer=setInterval(()=>{if(cur>=TF-1){if(looping){cur=0;draw(0)}else{togglePlay()}return}next()},speed)}
+  document.querySelectorAll('#ctrl button.active').forEach(b=>{if(b.id!=='bl')b.classList.remove('active')});
+  event.target.classList.add('active');
+  // playLoop reads speed live, no restart needed
 }
+
 
 document.addEventListener('keydown',e=>{
   if(e.key==='ArrowRight')next();
@@ -380,11 +456,20 @@ document.addEventListener('keydown',e=>{
 // Auto-start loop indicator
 document.getElementById('bl').classList.add('loop-on');
 
+// Mark initial speed button as active
+const initBtn = document.getElementById('s' + speed);
+if (initBtn) initBtn.classList.add('active');
+
 draw(0);
 </script>
 </body>
 </html>`;
 
+// Ensure output directory exists
+const outDir = path.dirname(OUTPUT);
+if (outDir && outDir !== '.' && !fs.existsSync(outDir)) {
+    fs.mkdirSync(outDir, { recursive: true });
+}
 fs.writeFileSync(OUTPUT, html);
 
 const outSize = Buffer.byteLength(html);

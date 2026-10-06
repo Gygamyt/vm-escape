@@ -5,94 +5,103 @@ Extract data from isolated VMs through visual side channels.
 The VM has no network, no clipboard, no shared folders — but it has a screen.
 **vm-escape** encodes any file as animated colored pixel grids on an HTML canvas inside the VM, then a decoder on the host captures the screen and reconstructs the original file.
 
-Built for extracting Allure test reports from locked-down CI/CD VMs, but works with any data.
+Built for extracting Allure test reports from locked-down CI/CD VMs, but works with any data — tar archives, JSON, text, PDFs, whatever.
 
 ## How it works
 
 ```
 ┌─────────── VM (isolated) ───────────┐     ┌─────────── Host ───────────────┐
 │                                     │     │                                │
-│  file.tar.gz                        │     │  host-decoder.html             │
+│  any file (json, tar.gz, ...)       │     │  host-decoder.html             │
 │       │                             │     │       │                        │
 │       ▼                             │     │       ▼                        │
 │  vm-encoder.js                      │     │  getDisplayMedia()             │
-│       │                             │     │  (auto screen capture)         │
+│       │  (auto-gzip + Q4 encode)    │     │  (auto screen capture)         │
 │       ▼                             │     │       │                        │
 │  frames.html ──── screen ──────────────────►  decode pixel grid            │
 │  (colored pixel grid,               │     │       │                        │
 │   plays in browser)                 │     │       ▼                        │
-│                                     │     │  file.tar.gz ✅                │
+│                                     │     │  original file ✅              │
 └─────────────────────────────────────┘     └────────────────────────────────┘
 ```
 
 ## Quick start
 
+> **TL;DR version:** see [QUICKSTART.md](QUICKSTART.md) — the whole flow in 30 seconds.
+
 ### Prerequisites
 
-- **VM side:** Node.js (to run the encoder) + any browser (to display frames)
-- **Host side:** Any modern browser with `getDisplayMedia` support (Chrome, Edge, Firefox)
+- **VM side:** Node.js + any browser
+- **Host side:** Chrome / Edge / Firefox with `getDisplayMedia` support
 
-### 1. Generate test data (optional)
+### 1. Encode a file (inside the VM)
 
-```bash
-# Generate dummy Allure reports for PoC testing
-node scripts/generate-dummies.js --preset small
-
-# Or all presets at once
-node scripts/generate-dummies.js
-```
-
-### 2. Encode a file (inside the VM)
+Copy the project (or just `src/encoder/vm-encoder.js`) into the VM, then:
 
 ```bash
-# Default Q4 mode — resilient to lossy screen capture
-node src/encoder/vm-encoder.js dummies/allure-small.tar.gz
+# Encode any file — it gets gzipped automatically if needed
+node src/encoder/vm-encoder.js myfile.json
 
-# RGB mode — higher throughput, but needs lossless screenshots
-node src/encoder/vm-encoder.js dummies/allure-small.tar.gz --mode rgb
+# With custom speed (ms between frames, default 300)
+node src/encoder/vm-encoder.js report.tar.gz --delay 100
 
 # Custom output path
 node src/encoder/vm-encoder.js data.tar.gz --output my-frames.html
 ```
 
-This produces `frames.html` — open it in the VM's browser.
+This produces `tmp/frames.html` — open it in the VM's browser. It starts playing automatically.
 
-### 3. Decode on the host
+### 2. Decode on the host
 
-1. Open `src/decoder/host-decoder.html` in a browser on the host machine
-2. Click **Start Capture**
-3. Select the VM window (the browser showing `frames.html`)
-4. The encoder auto-plays frames; the decoder auto-captures and decodes them
-5. When the progress bar hits 100%, click **Download File**
+1. Open `src/decoder/host-decoder.html` in a browser on the host
+2. Click **Start Capture** → select the VM window
+3. Frames decode automatically. Progress bar shows how many are left
+4. When done (or auto-stopped), click **Download**
 
-That's it — you have your file on the host.
+The decoder detects the file type and names the output accordingly (`decoded.json`, `decoded.tar.gz`, `decoded.xml`, etc).
+
+### 3. Test with dummy data
+
+```bash
+# Pre-built dummies are in dummies/
+node src/encoder/vm-encoder.js dummies/dummy.json          # ~90 KB JSON
+node src/encoder/vm-encoder.js dummies/allure-small.tar.gz # ~24 KB tar
+
+# Or generate fresh ones:
+node scripts/generate-dummies.js --preset small
+```
 
 ## Encoding modes
 
 | Mode | Bits/cell | Throughput/frame | Use case |
 |------|-----------|-----------------|----------|
-| **Q4** (default) | 6 bits | ~9.1 KB | Lossy capture via `getDisplayMedia`, video streams, screen recordings. Color levels are spaced 85 units apart (0, 85, 170, 255), surviving compression artifacts. |
-| **RGB** | 24 bits | ~36.4 KB | Lossless PNG screenshots only. 4x faster but breaks if any pixel value shifts. |
+| **Q4** (default) | 6 bits | ~9.1 KB | Lossy capture — getDisplayMedia, video streams, screen recordings. Color levels spaced 85 apart (0, 85, 170, 255), survives compression. |
+| **RGB** | 24 bits | ~36.4 KB | Lossless PNG screenshots only. 4× faster but breaks if any pixel shifts. |
 
 ## Encoder options
 
 ```
 node src/encoder/vm-encoder.js <file> [options]
 
-Options:
   --mode q4|rgb       Encoding mode (default: q4)
-  --block N           Pixel block size in px (default: 8)
-  --output FILE       Output HTML path (default: frames.html)
-  --help              Show detailed help
+  --block N           Block size in px (default: 8)
+  --delay N           Frame interval in ms (default: 300, min 50)
+  --output FILE       Output HTML path (default: tmp/frames.html)
+  --help              Show help
 ```
+
+The encoder UI has speed buttons (50–1000ms) and play/pause. It uses **double-buffered rendering** with `requestAnimationFrame` for tear-free display.
 
 ## Decoder features
 
-- **Auto-capture** via `getDisplayMedia` — no manual screenshots needed
-- **Auto-detection** of Q4 vs RGB mode
-- **CRC32 per-frame verification** with automatic retry/refinement
-- **Manual fallback** — drag & drop / Ctrl+V / file picker for individual screenshots
-- **Adjustable tolerance** for lossy captures (±3 for PNG, ±10–35 for video)
+- **Auto-capture** via `getDisplayMedia` — no manual screenshots
+- **Smart frame detection** — uses `requestVideoFrameCallback` to grab only when the video frame changes, with header pixel-signature diffing to skip unchanged frames
+- **Stale auto-stop** — stops capturing automatically when the encoder finishes (no new frames for a while)
+- **Auto file type detection** on download — decompresses gzip, sniffs content (tar/JSON/XML/ZIP/PDF/text), names the file correctly
+- **Auto-detection** of Q4 vs RGB mode from the first captured frame
+- **CRC32 verification** per frame with automatic retry
+- **Manual fallback** — drag & drop / Ctrl+V / file picker for screenshots
+- **Adjustable capture rate** and tolerance
 
 ## Project structure
 
@@ -100,42 +109,52 @@ Options:
 vm-escape/
 ├── src/
 │   ├── encoder/
-│   │   └── vm-encoder.js       # CLI encoder (runs inside VM)
+│   │   └── vm-encoder.js         # CLI encoder (runs inside VM)
 │   └── decoder/
-│       └── host-decoder.html   # Browser decoder (runs on host)
+│       └── host-decoder.html     # Browser decoder (runs on host)
 ├── scripts/
-│   └── generate-dummies.js     # Test data generator for PoC demos
+│   └── generate-dummies.js       # Test data generator
+├── dummies/                      # Pre-built test payloads
+│   ├── dummy.json                # ~90 KB fake test report
+│   ├── allure-tiny.tar.gz        # 2.5 KB
+│   ├── allure-small.tar.gz       # 24 KB
+│   ├── allure-medium.tar.gz      # 151 KB
+│   └── allure-custom.tar.gz      # 743 KB
+├── input_files/                  # Put your files here to encode
+├── QUICKSTART.md                 # TL;DR setup guide
 ├── package.json
 ├── LICENSE
 └── README.md
 ```
 
-## Dummy data generator
+## Dummy data
 
-Generate realistic test payloads for PoC demos:
+Pre-built test files sit in `dummies/`. To generate fresh ones:
 
 ```bash
-node scripts/generate-dummies.js --help       # show presets and options
-node scripts/generate-dummies.js --preset tiny # 10 KB — smoke test
-node scripts/generate-dummies.js --preset small # 50 KB — mini Allure report
-node scripts/generate-dummies.js              # all presets (tiny → xlarge)
+node scripts/generate-dummies.js --help         # show presets
+node scripts/generate-dummies.js --preset tiny   # 10 KB smoke test
+node scripts/generate-dummies.js --preset small  # 50 KB mini report
+node scripts/generate-dummies.js                 # all presets at once
 ```
-
-| Preset | Raw size | Q4 frames | Est. time (Q4) |
-|--------|----------|-----------|-----------------|
-| tiny | 10 KB | 1-2 | ~1 sec |
-| small | 50 KB | ~6 | ~3 sec |
-| medium | 500 KB | ~54 | ~27 sec |
-| large | 5 MB | ~540 | ~5 min |
-| xlarge | 50 MB | ~5400 | ~45 min |
 
 ## Technical details
 
-- Grid: 148×85 cells, 8px blocks, canvas 1200×696
-- Q4 encoding: 3 bytes packed into 4 cells (4 × 6-bit values)
-- Frame header: magic pattern + frame index + total frames + data length + CRC32
-- Auto gzip compression if input isn't already gzipped
-- Pure Node.js with zero dependencies
+- **Grid:** 148×85 cells, 8px blocks, canvas 1200×696
+- **Q4 encoding:** 3 bytes → 4 cells (4 × 6-bit values via color levels 0/85/170/255)
+- **Frame header:** magic pattern + frame index + total frames + data length + CRC32
+- **Capture:** `requestVideoFrameCallback` for frame-precise grabs (falls back to jittered `setTimeout` polling)
+- **Rendering:** double-buffered offscreen canvas + `requestAnimationFrame`
+- **Download:** auto-decompresses gzip, detects tar (ustar magic) / JSON / XML / ZIP / PDF / text
+- **Compression:** encoder auto-gzips any non-gzipped input
+- **Zero dependencies** — pure Node.js encoder, vanilla JS decoder
+
+## Notes
+
+- **Tested on files up to ~100 MB.** Larger files will produce thousands of frames and may take a long time. Stability at scale (10k+ frames) is not guaranteed — YMMV.
+- **The encoder is currently Node.js only**, but the encoding format is simple enough to implement in any language the VM supports (Python, C#, PowerShell, etc). Alternative encoder implementations are planned.
+- **The decoder is a standalone HTML file** with zero dependencies — it runs in any modern browser, no build step or server needed.
+- **Capture quality depends on your screen sharing setup.** For best results, share the VM window (not the whole screen), keep the encoder browser tab in focus and fully visible, and avoid overlapping windows.
 
 ## License
 
