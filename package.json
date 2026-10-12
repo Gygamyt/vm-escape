@@ -1,20 +1,28 @@
 {
   "name": "vm-escape",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Extract data from isolated VMs through side channels (screen, audio). Encoder renders data as colored pixel grids on canvas, decoder captures the screen and reconstructs the original file.",
   "license": "MIT",
   "private": true,
   "bin": {
-    "vm-encode": "src/encoder/vm-encoder.js",
+    "vm-encode": "src/encoder/node/vm-encoder.js",
     "generate-dummies": "scripts/generate-dummies.js"
   },
   "scripts": {
-    "encode": "node src/encoder/vm-encoder.js",
+    "encode": "node src/encoder/node/vm-encoder.js",
+    "encode:java": "java src/encoder/java/VmEncoder.java",
+    "encode:python": "python3 src/encoder/python/vm_encoder.py",
+    "encode:csharp": "dotnet-script src/encoder/csharp/VmEncoder.cs",
+    "encode:cpp": "src/encoder/cpp/vm_encoder",
+    "encode:go": "go run src/encoder/go/vm_encoder.go",
     "dummies": "node scripts/generate-dummies.js",
     "dummies:tiny": "node scripts/generate-dummies.js --preset tiny",
     "dummies:small": "node scripts/generate-dummies.js --preset small",
     "dummies:medium": "node scripts/generate-dummies.js --preset medium",
-    "dummies:all": "node scripts/generate-dummies.js"
+    "dummies:all": "node scripts/generate-dummies.js",
+    "test": "node tests/test-degradation.js",
+    "test:sweep": "node tests/test-degradation.js --sweep",
+    "test:verbose": "node tests/test-degradation.js --verbose"
   },
   "keywords": [
     "vm",

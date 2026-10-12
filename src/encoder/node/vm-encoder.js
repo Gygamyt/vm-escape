@@ -42,9 +42,12 @@ function showHelp() {
                         If not already gzipped, it will be compressed automatically.
 
   OPTIONS
-    --mode q4|rgb       Encoding mode (default: q4)
+    --mode q4|q2|rgb    Encoding mode (default: q4)
                           q4  — 4-level quantized, ~9.1 KB/frame. Survives lossy
                                 screen capture (getDisplayMedia, screenshots of video).
+                          q2  — 2-level quantized (black/white per channel),
+                                ~4.5 KB/frame. Ultra-robust for nested VMs or
+                                heavily compressed video. Half the bitrate of Q4.
                           rgb — full 24-bit color, ~36.4 KB/frame. Use only with
                                 lossless PNG screenshots.
     --block N           Pixel block size in px (default: 8). Larger blocks are easier to
@@ -100,8 +103,8 @@ const BLOCK  = parseInt(getArg('block', '8'));
 const DELAY  = Math.max(50, parseInt(getArg('delay', '300')));
 const OUTPUT = getArg('output', 'tmp/frames.html');
 
-if (MODE !== 'q4' && MODE !== 'rgb') {
-    console.error('Invalid mode "' + MODE + '". Use q4 or rgb.');
+if (MODE !== 'q4' && MODE !== 'q2' && MODE !== 'rgb') {
+    console.error('Invalid mode "' + MODE + '". Use q4, q2 or rgb.');
     process.exit(1);
 }
 
@@ -116,9 +119,11 @@ const CELLS_PER_FRAME = DATA_ROWS * COLS;
 // Q4: 4 cells → 3 bytes;  RGB: 1 cell → 3 bytes
 const BYTES_PER_FRAME = MODE === 'q4'
     ? Math.floor(CELLS_PER_FRAME / 4) * 3
+    : MODE === 'q2'
+    ? Math.floor(CELLS_PER_FRAME / 8) * 3
     : CELLS_PER_FRAME * 3;
 
-const MODE_ID = MODE === 'q4' ? 1 : 0;
+const MODE_ID = MODE === 'q4' ? 1 : MODE === 'q2' ? 2 : 0;
 const CANVAS_W = COLS * BLOCK + 2 * BORDER;
 const CANVAS_H = ROWS * BLOCK + 2 * BORDER;
 
@@ -191,7 +196,7 @@ if (data[0] !== 0x1f || data[1] !== 0x8b) {
 }
 
 const totalFrames = Math.ceil(data.length / BYTES_PER_FRAME);
-console.log('Mode:   ' + MODE + (MODE === 'q4' ? ' (4-level quantized, lossy-safe)' : ' (full RGB, lossless only)'));
+console.log('Mode:   ' + MODE + (MODE === 'q4' ? ' (4-level quantized, lossy-safe)' : MODE === 'q2' ? ' (2-level quantized, ultra-robust)' : ' (full RGB, lossless only)'));
 console.log('Grid:   ' + COLS + '×' + ROWS + ' cells, block=' + BLOCK + 'px, canvas=' + CANVAS_W + '×' + CANVAS_H);
 console.log('Payload per frame: ' + (BYTES_PER_FRAME / 1024).toFixed(1) + ' KB (' + CELLS_PER_FRAME + ' data cells)');
 console.log('Frames: ' + totalFrames);
@@ -216,6 +221,9 @@ if (htmlSizeMB > 50) {
 // Q4 magic cell 1: val=28 → R=1*85=85,  G=3*85=255, B=0*85=0
 const Q4_MAGIC0_VAL = 55;
 const Q4_MAGIC1_VAL = 28;
+// Q2 magic: val=5 → (255,0,255) magenta, val=6 → (255,255,0) yellow
+const Q2_MAGIC0_VAL = 5;
+const Q2_MAGIC1_VAL = 6;
 
 // ── Generate HTML ───────────────────────────────────────
 const html = `<!DOCTYPE html>
@@ -236,7 +244,7 @@ button.loop-on{background:#006;border-color:#00a}
 kbd{background:#222;padding:1px 5px;border-radius:2px;border:1px solid #444;font-size:12px}
 #hint{font-size:11px;color:#666;margin-top:4px}
 #mode-badge{display:inline-block;padding:2px 8px;border-radius:3px;font-weight:bold;margin:4px;font-size:12px;
-  background:${MODE === 'q4' ? '#530' : '#035'};color:${MODE === 'q4' ? '#fa0' : '#0af'}}
+  background:${MODE === 'q4' ? '#530' : MODE === 'q2' ? '#350' : '#035'};color:${MODE === 'q4' ? '#fa0' : MODE === 'q2' ? '#af0' : '#0af'}}
 </style>
 </head>
 <body>
@@ -266,7 +274,7 @@ const B64="${b64}";
 // ── Constants ──
 const BLK=${BLOCK},COLS=${COLS},ROWS=${ROWS},BDR=${BORDER};
 const BPF=${BYTES_PER_FRAME};
-const MODE=${MODE_ID}; // 0=RGB, 1=Q4
+const MODE=${MODE_ID}; // 0=RGB, 1=Q4, 2=Q2
 
 // ── Decode base64 → Uint8Array ──
 function b2u(s){const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u}
@@ -290,6 +298,11 @@ function cell(c,r,R,G,B){off.fillStyle='rgb('+R+','+G+','+B+')';off.fillRect(BDR
 // Q4: encode 6-bit value as RGB (2 bits per channel, levels 0,85,170,255)
 function q4cell(c,r,val){
   cell(c,r,((val>>4)&3)*85,((val>>2)&3)*85,(val&3)*85);
+}
+
+// Q2: encode 3-bit value as RGB (1 bit per channel, levels 0,255)
+function q2cell(c,r,val){
+  cell(c,r,((val>>2)&1)*255,((val>>1)&1)*255,(val&1)*255);
 }
 
 // ── Draw one frame ──
@@ -367,6 +380,60 @@ function draw(idx){
         q4cell(c,r,vals[k]);
       }
     }
+  } else if(MODE===2){
+    // ═══ Q2 HEADER ═══
+    // Q2: 3 bits/cell (1 bit per channel), values 0-7
+    function q2h(col,val){ q2cell(col,0,val); }
+
+    // Magic
+    q2h(0,${Q2_MAGIC0_VAL}); // (255,0,255) magenta
+    q2h(1,${Q2_MAGIC1_VAL}); // (255,255,0) yellow
+    // Frame index (18 bits → 6 cells × 3 bits)
+    q2h(2,(idx>>15)&7); q2h(3,(idx>>12)&7); q2h(4,(idx>>9)&7);
+    q2h(5,(idx>>6)&7);  q2h(6,(idx>>3)&7);  q2h(7,idx&7);
+    // Total frames (18 bits → 6 cells)
+    q2h(8,(TF>>15)&7);  q2h(9,(TF>>12)&7);  q2h(10,(TF>>9)&7);
+    q2h(11,(TF>>6)&7);  q2h(12,(TF>>3)&7);  q2h(13,TF&7);
+    // Data length (18 bits → 6 cells)
+    q2h(14,(dl>>15)&7); q2h(15,(dl>>12)&7); q2h(16,(dl>>9)&7);
+    q2h(17,(dl>>6)&7);  q2h(18,(dl>>3)&7);  q2h(19,dl&7);
+    // CRC32 (32 bits → 11 cells, 33 bits available, MSB first)
+    q2h(20,(chk>>>30)&7); q2h(21,(chk>>>27)&7); q2h(22,(chk>>>24)&7);
+    q2h(23,(chk>>>21)&7); q2h(24,(chk>>>18)&7); q2h(25,(chk>>>15)&7);
+    q2h(26,(chk>>>12)&7); q2h(27,(chk>>>9)&7);  q2h(28,(chk>>>6)&7);
+    q2h(29,(chk>>>3)&7);  q2h(30,chk&7);
+    // Grid dims: COLS (4 cells=12 bits), ROWS (4 cells), block (2 cells), mode (1 cell)
+    q2h(31,(COLS>>9)&7); q2h(32,(COLS>>6)&7); q2h(33,(COLS>>3)&7); q2h(34,COLS&7);
+    q2h(35,(ROWS>>9)&7); q2h(36,(ROWS>>6)&7); q2h(37,(ROWS>>3)&7); q2h(38,ROWS&7);
+    q2h(39,(BLK>>3)&7);  q2h(40,BLK&7);
+    q2h(41,2); // mode marker = 2
+    // Padding
+    for(let c=42;c<COLS;c++) q2h(c,0);
+
+    // ═══ Q2 DATA ═══
+    // 8 cells × 3 bits = 24 bits = 3 bytes
+    let bi=0, ci=0;
+    const totalCells=COLS*(ROWS-1);
+    while(ci<totalCells){
+      const b0=bi<dl?fd[bi++]:0;
+      const b1=bi<dl?fd[bi++]:0;
+      const b2=bi<dl?fd[bi++]:0;
+      // 24 bits → 8 × 3-bit values
+      const v0=(b0>>5)&7;
+      const v1=(b0>>2)&7;
+      const v2=((b0&3)<<1)|(b1>>7);
+      const v3=(b1>>4)&7;
+      const v4=(b1>>1)&7;
+      const v5=((b1&1)<<2)|(b2>>6);
+      const v6=(b2>>3)&7;
+      const v7=b2&7;
+      const vals=[v0,v1,v2,v3,v4,v5,v6,v7];
+      for(let k=0;k<8&&ci<totalCells;k++,ci++){
+        const r=Math.floor(ci/COLS)+1;
+        const c=ci%COLS;
+        q2cell(c,r,vals[k]);
+      }
+    }
   } else {
     // ═══ RGB HEADER (same as v1) ═══
     cell(0,0,0xDE,0xAD,0x01);
@@ -389,7 +456,7 @@ function draw(idx){
     }
   }
 
-  info.textContent='Frame '+(idx+1)+'/'+TF+'  |  '+dl+' B  |  CRC 0x'+chk.toString(16).toUpperCase().padStart(8,'0')+'  |  '+(MODE?'Q4':'RGB')+'  |  Total '+(data.length/1048576).toFixed(2)+' MB';
+  info.textContent='Frame '+(idx+1)+'/'+TF+'  |  '+dl+' B  |  CRC 0x'+chk.toString(16).toUpperCase().padStart(8,'0')+'  |  '+(MODE===2?'Q2':MODE===1?'Q4':'RGB')+'  |  Total '+(data.length/1048576).toFixed(2)+' MB';
 
   // Atomic blit: copy completed frame to visible canvas in one operation
   cx.drawImage(offCv,0,0);

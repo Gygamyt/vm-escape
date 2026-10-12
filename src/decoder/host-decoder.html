@@ -143,11 +143,13 @@ const RGB_MAGIC0 = [0xDE, 0xAD, 0x01];
 const RGB_MAGIC1 = [0xBE, 0xEF, 0x02];
 const Q4_MAGIC0_VAL = 55;  // → (255, 85, 255)
 const Q4_MAGIC1_VAL = 28;  // → (85, 255, 0)
+const Q2_MAGIC0_VAL = 5;   // → (255, 0, 255) magenta
+const Q2_MAGIC1_VAL = 6;   // → (255, 255, 0) yellow
 
 let TOLERANCE = 3;  // for manual RGB mode input
 let frames = {};
 let totalFrames = null;
-let detectedMode = null;  // 'q4' or 'rgb'
+let detectedMode = null;  // 'q4', 'q2' or 'rgb'
 let cachedScale = null;
 let cachedOrigin = null;  // { gx, gy } for auto-capture position caching
 
@@ -217,6 +219,14 @@ function q4val(r, g, b) {
     return (q4level(r) << 4) | (q4level(g) << 2) | q4level(b);
 }
 
+// Q2 quantize: pixel → nearest level (0-1)
+function q2level(v) { return v >= 128 ? 1 : 0; }
+
+// Q2: decode one cell to 3-bit value
+function q2val(r, g, b) {
+    return (q2level(r) << 2) | (q2level(g) << 1) | q2level(b);
+}
+
 // ═══════════════════════════════════════════════════════════
 //  GRID DETECTION — find magic cells, compute float block size
 // ═══════════════════════════════════════════════════════════
@@ -231,13 +241,27 @@ function isQ4Magic1(r, g, b) {
     return q4level(r) === 1 && q4level(g) === 3 && q4level(b) === 0;
 }
 
+function isQ2Magic0(r, g, b) {
+    // Q2 magic 0: val 5 → (255, 0, 255) → levels (1, 0, 1)
+    return q2level(r) === 1 && q2level(g) === 0 && q2level(b) === 1;
+}
+
+function isQ2Magic1(r, g, b) {
+    // Q2 magic 1: val 6 → (255, 255, 0) → levels (1, 1, 0)
+    return q2level(r) === 1 && q2level(g) === 1 && q2level(b) === 0;
+}
+
 function findMagicCells(img, mode) {
     const W = img.width, H = img.height;
     const isM0 = mode === 'q4'
         ? (x, y) => isQ4Magic0(...px(img, x, y))
+        : mode === 'q2'
+        ? (x, y) => isQ2Magic0(...px(img, x, y))
         : (x, y) => matchRGB(px(img, x, y), RGB_MAGIC0);
     const isM1 = mode === 'q4'
         ? (x, y) => isQ4Magic1(...px(img, x, y))
+        : mode === 'q2'
+        ? (x, y) => isQ2Magic1(...px(img, x, y))
         : (x, y) => matchRGB(px(img, x, y), RGB_MAGIC1);
 
     // If we have a cached origin, try there first (±small offset)
@@ -268,7 +292,10 @@ function findMagicCells(img, mode) {
         if (cellW < 3 || cellH < 3 || cellW > 200 || cellH > 200) continue;
 
         // Find MAGIC1 cell (immediately right of MAGIC0)
-        const midY = Math.round((t0 + b0) / 2);
+        // Use cellW for midY offset instead of full vertical extent —
+        // a data cell below magic0 might share its color, extending b0
+        // and shifting midY into a data row where magic1 won't be found.
+        const midY = Math.round(t0 + cellW / 2);
         let l1 = r0 + 1;
         const maxScan = r0 + cellW * 2;
         while (l1 <= maxScan && l1 < W && !isM1(l1, midY)) l1++;
@@ -305,6 +332,10 @@ function detectModeAndGrid(img) {
     // Try Q4 first (it's the v2 default)
     let magic = findMagicCells(img, 'q4');
     if (magic) return { mode: 'q4', magic };
+
+    // Try Q2 (ultra-robust mode)
+    magic = findMagicCells(img, 'q2');
+    if (magic) return { mode: 'q2', magic };
 
     // Fallback to RGB
     magic = findMagicCells(img, 'rgb');
@@ -430,6 +461,81 @@ function tryDecodeRGB(img, gx, gy, bx, by) {
     };
 }
 
+
+function tryDecodeQ2(img, gx, gy, bx, by) {
+    function rc(col, row) {
+        const cx = Math.round(gx + (col + 0.5) * bx);
+        const cy = Math.round(gy + (row + 0.5) * by);
+        return px(img, cx, cy);
+    }
+
+    // Read Q2 header cells (3 bits each)
+    function q2h(col) { return q2val(...rc(col, 0)); }
+
+    // Verify magic
+    if (q2h(0) !== Q2_MAGIC0_VAL || q2h(1) !== Q2_MAGIC1_VAL) return null;
+
+    // Frame index (18 bits → 6 cells × 3 bits)
+    const frameIdx = (q2h(2) << 15) | (q2h(3) << 12) | (q2h(4) << 9) |
+                     (q2h(5) << 6)  | (q2h(6) << 3)  | q2h(7);
+    // Total frames
+    const frameTot = (q2h(8) << 15) | (q2h(9) << 12) | (q2h(10) << 9) |
+                     (q2h(11) << 6) | (q2h(12) << 3) | q2h(13);
+    // Data length
+    const dataLen = (q2h(14) << 15) | (q2h(15) << 12) | (q2h(16) << 9) |
+                    (q2h(17) << 6)  | (q2h(18) << 3)  | q2h(19);
+    // CRC32 (32 bits → 11 cells, 33 bits, MSB first)
+    const v20=q2h(20), v21=q2h(21), v22=q2h(22), v23=q2h(23), v24=q2h(24);
+    const v25=q2h(25), v26=q2h(26), v27=q2h(27), v28=q2h(28), v29=q2h(29), v30=q2h(30);
+    const expectCrc = ((v20 << 30) | (v21 << 27) | (v22 << 24) | (v23 << 21) |
+                       (v24 << 18) | (v25 << 15) | (v26 << 12) | (v27 << 9) |
+                       (v28 << 6) | (v29 << 3) | v30) >>> 0;
+    // Grid dims
+    const cols = (q2h(31) << 9) | (q2h(32) << 6) | (q2h(33) << 3) | q2h(34);
+    const rows = (q2h(35) << 9) | (q2h(36) << 6) | (q2h(37) << 3) | q2h(38);
+    const blockSz = (q2h(39) << 3) | q2h(40);
+
+    // Sanity
+    if (frameTot < 1 || frameTot > 999999) return null;
+    if (cols < 10 || cols > 300) return null;
+    if (rows < 5 || rows > 200) return null;
+    if (dataLen < 0 || dataLen > Math.floor(cols * (rows - 1) / 8) * 3 + 3) return null;
+    if (frameIdx < 0 || frameIdx >= frameTot) return null;
+
+    // Read Q2 data: 8 cells × 3 bits = 24 bits = 3 bytes
+    const fd = new Uint8Array(dataLen);
+    let bi = 0, ci = 0;
+    const totalCells = cols * (rows - 1);
+
+    while (ci < totalCells && bi < dataLen) {
+        const vals = [];
+        for (let k = 0; k < 8 && ci < totalCells; k++, ci++) {
+            const r = Math.floor(ci / cols) + 1;
+            const c = ci % cols;
+            vals.push(q2val(...rc(c, r)));
+        }
+        // Unpack 8 × 3-bit values → 3 bytes (24 bits)
+        const v0 = vals[0] || 0, v1 = vals[1] || 0, v2 = vals[2] || 0, v3 = vals[3] || 0;
+        const v4 = vals[4] || 0, v5 = vals[5] || 0, v6 = vals[6] || 0, v7 = vals[7] || 0;
+        const b0 = (v0 << 5) | (v1 << 2) | (v2 >> 1);
+        const b1 = ((v2 & 1) << 7) | (v3 << 4) | (v4 << 1) | (v5 >> 2);
+        const b2 = ((v5 & 3) << 6) | (v6 << 3) | v7;
+        if (bi < dataLen) fd[bi++] = b0;
+        if (bi < dataLen) fd[bi++] = b1;
+        if (bi < dataLen) fd[bi++] = b2;
+    }
+
+    const actualCrc = crc32(fd);
+    return {
+        frameIdx, frameTot, dataLen, fd,
+        crcOk: actualCrc === expectCrc,
+        expectCrc, actualCrc,
+        cols, rows, blockSz,
+        blkX: bx, blkY: by,
+        mode: 'q2'
+    };
+}
+
 // ═══════════════════════════════════════════════════════════
 //  MAIN DECODE PIPELINE — with CRC-guided refinement
 // ═══════════════════════════════════════════════════════════
@@ -455,7 +561,7 @@ function decodeFrame(img, label, verbose) {
     // Cache origin for faster subsequent scans
     cachedOrigin = { gx, gy };
 
-    const tryDec = mode === 'q4' ? tryDecodeQ4 : tryDecodeRGB;
+    const tryDec = mode === 'q4' ? tryDecodeQ4 : mode === 'q2' ? tryDecodeQ2 : tryDecodeRGB;
 
     // 1. Try cached scale first
     if (cachedScale) {
