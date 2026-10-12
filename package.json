@@ -23,13 +23,5 @@
     "test": "node tests/test-degradation.js",
     "test:sweep": "node tests/test-degradation.js --sweep",
     "test:verbose": "node tests/test-degradation.js --verbose"
-  },
-  "keywords": [
-    "vm",
-    "data-exfiltration",
-    "screen-encoding",
-    "visual-data-transfer",
-    "side-channel",
-    "airgap"
-  ]
+  }
 }
